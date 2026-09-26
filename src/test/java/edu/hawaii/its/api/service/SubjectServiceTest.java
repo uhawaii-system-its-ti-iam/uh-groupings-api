@@ -175,6 +175,21 @@ public class SubjectServiceTest {
     }
 
     @Test
+    public void validateUhIdentifiersReportsInvalidIdentifiersInSubmittedOrder() {
+        // Malformed entries never reach Grouper and unknown ones are only found after the lookup, but the
+        // caller (e.g. a file import listing rows it could not add) needs them in the order they were submitted.
+        List<String> identifiers = List.of("1234", "12-345-678", "goodUid", "0000000a", "!!!!!!!!");
+        List<String> wellFormed = List.of("1234", "goodUid", "0000000a");
+        given(grouperService.getSubjects(wellFormed))
+                .willReturn(subjectsResultsInOrder(wellFormed, List.of("SUBJECT_NOT_FOUND", "SUCCESS", "SUBJECT_NOT_FOUND")));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("uhuuid-goodUid"), result.getValidIdentifiers());
+        assertEquals(List.of("1234", "12-345-678", "0000000a", "!!!!!!!!"), result.getInvalidIdentifiers());
+    }
+
+    @Test
     public void validateUhIdentifiersFallsBackToOriginalIdentifierWhenSubjectHasNoUhUuid() {
         // Julio's warning: a subject can resolve successfully in Grouper without carrying a uhUuid, so the
         // original submitted identifier - not an empty/derived uhUuid - must be used for the add.

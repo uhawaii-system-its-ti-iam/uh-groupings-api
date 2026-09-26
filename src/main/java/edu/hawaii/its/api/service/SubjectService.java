@@ -1,7 +1,9 @@
 package edu.hawaii.its.api.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
@@ -141,7 +143,12 @@ public class SubjectService {
                 validIdentifiers.add(uhUuid.isEmpty() ? uhIdentifier : uhUuid);
             }
         }
-        return new UhIdentifierValidationResult(validIdentifiers, invalidIdentifiers);
+
+        // Malformed and unknown identifiers were collected separately above; report them back in the order
+        // they were submitted (e.g. the row order of an imported file) rather than grouped by failure reason.
+        Set<String> invalidSet = new HashSet<>(invalidIdentifiers);
+        List<String> invalidInSubmittedOrder = uniqueIdentifiers.stream().filter(invalidSet::contains).toList();
+        return new UhIdentifierValidationResult(validIdentifiers, invalidInSubmittedOrder);
     }
 
     public String getValidUhUuid(String currentUser, String uhIdentifier) {
