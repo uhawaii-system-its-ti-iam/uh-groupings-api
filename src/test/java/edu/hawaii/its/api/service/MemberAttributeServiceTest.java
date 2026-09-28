@@ -70,7 +70,9 @@ public class MemberAttributeServiceTest {
     }
 
     /**
-     * Builds a SubjectsResults with one WsSubject per identifier, in request order. A found subject carries
+     * Builds a SubjectsResults with one WsSubject per identifier, in request order (real Grouper collapses unknown
+     * identifiers into one entry; see getMemberAttributeResultsReportsUnknownIdentifiersGrouperCollapsedIntoOneEntry).
+     * A found subject carries
      * UH attributes, like a real Grouper lookup, so it is kept when member attributes are read back.
      */
     private SubjectsResults subjectsResultsInOrder(List<String> identifiers, List<String> resultCodes) {
@@ -155,6 +157,33 @@ public class MemberAttributeServiceTest {
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(TEST_USER, identifiers);
 
         assertEquals(List.of("1234"), results.getInvalid());
+    }
+
+    @Test
+    public void getMemberAttributeResultsReportsUnknownIdentifiersGrouperCollapsedIntoOneEntry() {
+        // Real Grouper answers a bulk lookup with one SUBJECT_NOT_FOUND entry however many identifiers are unknown
+        // (see TestGrouperApiService.getSubjects), so there are fewer entries than identifiers looked up.
+        List<String> identifiers = List.of("1234", "00000001", "abcdefgh", "0000000a");
+        WsSubject found = new WsSubject();
+        found.setResultCode("SUCCESS");
+        found.setId("00000001");
+        found.setAttributeValues(new String[] { "uidone", "Name", "Last", "First", "email" });
+        WsSubject notFound = new WsSubject();
+        notFound.setResultCode("SUBJECT_NOT_FOUND");
+
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode("SUCCESS");
+        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
+        wsGetSubjectsResults.setResultMetadata(resultMetadata);
+        wsGetSubjectsResults.setWsSubjects(new WsSubject[] { found, notFound });
+        given(grouperService.getSubjects(identifiers)).willReturn(new SubjectsResults(wsGetSubjectsResults));
+
+        MemberAttributeResults results =
+                memberAttributeService.getMemberAttributeResultsAsync(TEST_USER, identifiers).join();
+
+        assertEquals(List.of("1234", "abcdefgh", "0000000a"), results.getInvalid());
+        assertTrue(results.getResults().isEmpty());
+        verify(grouperService, never()).getSubjects(anyString());
     }
 
     @Test

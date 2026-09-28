@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.hawaii.its.api.wrapper.GetMembersResult;
@@ -38,6 +39,10 @@ import edu.hawaii.its.api.wrapper.HasMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
+import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -296,10 +301,9 @@ public class UpdateMemberServiceTest {
                 .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
         doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
-        // getSubjectsResultsSuccessTestData carries 4 subjects (1 not found, 3 found), so the identifiers
-        // submitted for validation must also number 4 to line up with it.
+        // The first identifier is unknown to Grouper and the other three are found.
         List<String> uhIdentifiersToAdd = TEST_UIDS.subList(0, 4);
-        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        SubjectsResults subjectsResults = subjectsResultsWithFirstIdentifierUnknown(uhIdentifiersToAdd);
         doReturn(subjectsResults).when(grouperService).getSubjects(uhIdentifiersToAdd);
 
         UhIdentifierValidationResult validationResult =
@@ -334,10 +338,9 @@ public class UpdateMemberServiceTest {
                 .hasMemberResults(groupPath + GroupType.OWNERS.value(), TEST_UIDS.get(0));
         doReturn(hasMembersResults).when(grouperService).hasMemberResults(GROUPING_ADMINS, TEST_UIDS.get(0));
 
-        // getSubjectsResultsSuccessTestData carries 4 subjects (1 not found, 3 found), so the identifiers
-        // submitted for validation must also number 4 to line up with it.
+        // The first identifier is unknown to Grouper and the other three are found.
         List<String> uhIdentifiersToAdd = TEST_UIDS.subList(0, 4);
-        SubjectsResults subjectsResults = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        SubjectsResults subjectsResults = subjectsResultsWithFirstIdentifierUnknown(uhIdentifiersToAdd);
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects(uhIdentifiersToAdd);
 
@@ -521,5 +524,30 @@ public class UpdateMemberServiceTest {
         doReturn(groupAttributeResults).when(grouperService).groupAttributeResult(TEST_UIDS.get(1), groupPath);
 
         assertNotNull(updateMemberService.optOut(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
+    }
+
+    /**
+     * The answer real Grouper gives to a bulk lookup in which the first identifier is unknown and the others are found:
+     * one SUBJECT_NOT_FOUND entry, plus a found subject (uhUuid "uhuuid-N") carrying each of the other uids.
+     */
+    private SubjectsResults subjectsResultsWithFirstIdentifierUnknown(List<String> uids) {
+        List<WsSubject> wsSubjects = new ArrayList<>();
+        WsSubject notFound = new WsSubject();
+        notFound.setResultCode("SUBJECT_NOT_FOUND");
+        wsSubjects.add(notFound);
+        for (int i = 1; i < uids.size(); i++) {
+            WsSubject subject = new WsSubject();
+            subject.setResultCode("SUCCESS");
+            subject.setId("uhuuid-" + i);
+            subject.setAttributeValues(new String[] { uids.get(i), "name-" + i, "Last", "First", "email" });
+            wsSubjects.add(subject);
+        }
+
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode("SUCCESS");
+        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
+        wsGetSubjectsResults.setResultMetadata(resultMetadata);
+        wsGetSubjectsResults.setWsSubjects(wsSubjects.toArray(new WsSubject[0]));
+        return new SubjectsResults(wsGetSubjectsResults);
     }
 }

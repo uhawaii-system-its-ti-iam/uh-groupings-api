@@ -69,12 +69,14 @@ public class SubjectsResults extends Results {
     }
 
     /**
-     * Returns one Subject per WsSubjectLookup submitted in the request, in request order, without the
-     * "successful but no UH attributes" filtering that getSubjects() applies. Needed when a caller must
-     * correlate each result back to the specific identifier that produced it (e.g. bulk identifier
-     * validation), since that filtering would otherwise silently drop entries and desync the correlation.
+     * Returns every Subject Grouper answered with, without the "successful but no UH attributes" filtering that
+     * getSubjects() applies. Needed when a caller must know which identifiers resolved (e.g. bulk identifier
+     * validation), since that filtering would otherwise drop resolved subjects that have no LDAP data.
+     * <p>
+     * Grouper does not answer with one entry per lookup: lookups that resolve to nothing are collapsed into a
+     * single SUBJECT_NOT_FOUND entry, so results can't be correlated with the lookups by position or count.
      */
-    public List<Subject> getSubjectsInRequestOrder() {
+    public List<Subject> getUnfilteredSubjects() {
         List<Subject> subjects = new ArrayList<>();
         WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
         if (isEmpty(wsSubjects)) {

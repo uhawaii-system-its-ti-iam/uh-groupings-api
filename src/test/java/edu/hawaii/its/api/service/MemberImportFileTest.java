@@ -192,28 +192,37 @@ public class MemberImportFileTest {
         return IntStream.rangeClosed(1, count).mapToObj(i -> String.format("%08d", i)).toList();
     }
 
-    /** A Grouper subject lookup: one result per identifier, in request order. */
+    /**
+     * A Grouper subject lookup, shaped like real Grouper's answer (see TestGrouperApiService.getSubjects): every
+     * lookup that resolves to nothing is collapsed into one SUBJECT_NOT_FOUND entry, so there is not one entry per
+     * identifier, and the entries are not in request order. A subject found by UH number carries it as its id and
+     * its uid as the first attribute.
+     */
     private static SubjectsResults subjectsResultsFor(List<String> identifiers) {
-        WsSubject[] wsSubjects = new WsSubject[identifiers.size()];
-        for (int i = 0; i < identifiers.size(); i++) {
-            String identifier = identifiers.get(i);
-            WsSubject subject = new WsSubject();
-            subject.setIdentifierLookup(identifier);
+        List<WsSubject> wsSubjects = new ArrayList<>();
+        boolean anyUnknown = false;
+        for (String identifier : identifiers) {
             if (KNOWN_UH_NUMBERS.contains(identifier)) {
+                WsSubject subject = new WsSubject();
                 subject.setResultCode("SUCCESS");
                 subject.setId(identifier);
                 subject.setAttributeValues(new String[] { "user" + identifier, "Name", "Last", "First", "email" });
+                wsSubjects.add(0, subject);
             } else {
-                subject.setResultCode("SUBJECT_NOT_FOUND");
+                anyUnknown = true;
             }
-            wsSubjects[i] = subject;
+        }
+        if (anyUnknown) {
+            WsSubject notFound = new WsSubject();
+            notFound.setResultCode("SUBJECT_NOT_FOUND");
+            wsSubjects.add(notFound);
         }
 
         WsResultMeta resultMetadata = new WsResultMeta();
         resultMetadata.setResultCode("SUCCESS");
         WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
         wsGetSubjectsResults.setResultMetadata(resultMetadata);
-        wsGetSubjectsResults.setWsSubjects(wsSubjects);
+        wsGetSubjectsResults.setWsSubjects(wsSubjects.toArray(new WsSubject[0]));
         return new SubjectsResults(wsGetSubjectsResults);
     }
 }

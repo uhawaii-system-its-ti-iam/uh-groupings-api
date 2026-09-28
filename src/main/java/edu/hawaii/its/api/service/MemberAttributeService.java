@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
 import edu.hawaii.its.api.type.GroupingPath;
-import edu.hawaii.its.api.wrapper.SubjectsResults;
+import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 
 @Service("memberAttributeService")
 public class MemberAttributeService {
@@ -27,19 +27,15 @@ public class MemberAttributeService {
     @Value("${groupings.api.failure}")
     private String FAILURE;
 
-    private final GrouperService grouperService;
-
     private final SubjectService subjectService;
 
     private final MemberService memberService;
 
     private final GroupingsService groupingsService;
 
-    public MemberAttributeService(GrouperService grouperService,
-            SubjectService subjectService,
+    public MemberAttributeService(SubjectService subjectService,
             MemberService memberService,
             GroupingsService groupingsService) {
-        this.grouperService = grouperService;
         this.subjectService = subjectService;
         this.memberService = memberService;
         this.groupingsService = groupingsService;
@@ -78,16 +74,15 @@ public class MemberAttributeService {
     /**
      * Malformed identifiers are reported as invalid, like unknown ones, instead of failing the whole request:
      * a bulk import can contain any number of them (e.g. "12-345-678") and needs the full list of invalid
-     * identifiers back to report. All identifiers are checked with a single bulk Grouper lookup.
+     * identifiers back to report. All identifiers are checked with a single bulk Grouper lookup: the subjects
+     * that lookup already resolved are reused for the attribute results below rather than looked up again.
      */
     private MemberAttributeResults resolveMemberAttributeResults(String currentUser, List<String> uhIdentifiers) {
-        List<String> invalidUhIdentifiers =
-                subjectService.validateUhIdentifiers(currentUser, uhIdentifiers).getInvalidIdentifiers();
-        if (!invalidUhIdentifiers.isEmpty()) {
-            return new MemberAttributeResults(invalidUhIdentifiers);
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        if (!validationResult.getInvalidIdentifiers().isEmpty()) {
+            return new MemberAttributeResults(validationResult.getInvalidIdentifiers());
         }
-        SubjectsResults results = grouperService.getSubjects(uhIdentifiers);
-        return new MemberAttributeResults(results);
+        return MemberAttributeResults.forValidSubjects(validationResult.getValidSubjects());
     }
 
     /**

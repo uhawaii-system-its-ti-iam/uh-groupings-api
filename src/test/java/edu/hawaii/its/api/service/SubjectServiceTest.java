@@ -3,7 +3,11 @@ package edu.hawaii.its.api.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.type.UhIdentifierValidationResult;
+import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
@@ -84,8 +89,8 @@ public class SubjectServiceTest {
 
     /**
      * Builds a SubjectsResults with one WsSubject per identifier, in the same order, so tests can control
-     * exactly which positions are found/not-found - mirroring the request/response correlation that
-     * SubjectsResults.getSubjectsInRequestOrder() relies on.
+     * exactly which identifiers are found/not-found. Real Grouper collapses unknown identifiers into one entry;
+     * see subjectsResultsLikeGrouper for that shape.
      */
     private SubjectsResults subjectsResultsInOrder(List<String> identifiers, List<String> resultCodes) {
         WsResultMeta resultMetadata = new WsResultMeta();
@@ -128,6 +133,9 @@ public class SubjectServiceTest {
 
         assertEquals(11, result.getValidIdentifiers().size());
         assertTrue(result.getInvalidIdentifiers().isEmpty());
+        // The Grouper subject behind each valid identifier is returned too, so a caller needing attributes
+        // (MemberAttributeService) can use this one lookup instead of querying Grouper again.
+        assertEquals(11, result.getValidSubjects().size());
     }
 
     @Test
@@ -221,12 +229,148 @@ public class SubjectServiceTest {
     }
 
     @Test
-    public void validateUhIdentifiersThrowsWhenGrouperReturnsUnexpectedResultCount() {
+    public void validateUhIdentifiersDoesNotRequireOneResultPerIdentifier() {
         List<String> identifiers = List.of("uidA", "uidB");
         given(grouperService.getSubjects(identifiers))
                 .willReturn(subjectsResultsInOrder(List.of("uidA"), List.of("SUCCESS")));
 
-        assertThrows(GrouperException.class, () -> subjectService.validateUhIdentifiers(TEST_USER, identifiers));
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("uhuuid-uidA"), result.getValidIdentifiers());
+        assertEquals(List.of("uidB"), result.getInvalidIdentifiers());
+    }
+
+    // The tests below use the response shape real Grouper produces (see TestGrouperApiService.getSubjects):
+    // lookups that resolve to nothing are collapsed into a single SUBJECT_NOT_FOUND entry, and the entries are
+    // not in request order. A found subject carries its UH number as id and its uid as identifierLookup (when it
+    // was looked up by uid) or as the first attribute.
+
+    @Test
+    public void validateUhIdentifiersReportsEveryUnknownIdentifierWhenGrouperCollapsesThemIntoOneEntry() {
+        List<String> identifiers = List.of("1234", "abcdefgh", "0000000a");
+        given(grouperService.getSubjects(identifiers))
+                .willReturn(subjectsResultsLikeGrouper(notFoundEntry()));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertTrue(result.getValidIdentifiers().isEmpty());
+        assertEquals(identifiers, result.getInvalidIdentifiers());
+        verify(grouperService, never()).getSubjects(anyString());
+    }
+
+    @Test
+    public void validateUhIdentifiersMatchesFoundSubjectsToIdentifiersWhateverTheResponseOrder() {
+        List<String> identifiers = List.of("1234", "00000001", "abcdefgh", "00000002", "0000000a");
+        given(grouperService.getSubjects(identifiers))
+                .willReturn(subjectsResultsLikeGrouper(
+                        foundByUhNumber("00000002", "uidtwo"),
+                        notFoundEntry(),
+                        foundByUhNumber("00000001", "uidone")));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("00000001", "00000002"), result.getValidIdentifiers());
+        assertEquals(List.of("1234", "abcdefgh", "0000000a"), result.getInvalidIdentifiers());
+        assertEquals(2, result.getValidSubjects().size());
+        assertEquals(List.of("uidone", "uidtwo"),
+                result.getValidSubjects().stream().map(Subject::getUid).toList());
+        verify(grouperService, never()).getSubjects(anyString());
+    }
+
+    @Test
+    public void validateUhIdentifiersMatchesSubjectsFoundByUid() {
+        List<String> identifiers = List.of("uidone", "nobody");
+        given(grouperService.getSubjects(identifiers))
+                .willReturn(subjectsResultsLikeGrouper(foundByUid("00000001", "uidone"), notFoundEntry()));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("00000001"), result.getValidIdentifiers());
+        assertEquals(List.of("nobody"), result.getInvalidIdentifiers());
+    }
+
+    @Test
+    public void validateUhIdentifiersListsASubjectOnceWhenItsUidAndUhNumberAreBothSubmitted() {
+        // Grouper answers both lookups with the one subject.
+        List<String> identifiers = List.of("uidone", "00000001");
+        given(grouperService.getSubjects(identifiers))
+                .willReturn(subjectsResultsLikeGrouper(foundByUid("00000001", "uidone")));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("00000001"), result.getValidIdentifiers());
+        assertTrue(result.getInvalidIdentifiers().isEmpty());
+        // Both identifiers resolved to the same subject, so it's returned once, not twice.
+        assertEquals(1, result.getValidSubjects().size());
+        verify(grouperService, never()).getSubjects(anyString());
+    }
+
+    @Test
+    public void validateUhIdentifiersIgnoresCaseWhenMatchingIdentifiers() {
+        List<String> identifiers = List.of("UIDONE");
+        given(grouperService.getSubjects(identifiers))
+                .willReturn(subjectsResultsLikeGrouper(foundByUhNumber("00000001", "uidone")));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("00000001"), result.getValidIdentifiers());
+        assertTrue(result.getInvalidIdentifiers().isEmpty());
+    }
+
+    @Test
+    public void validateUhIdentifiersVerifiesLeftoverIdentifiersWhenAFoundSubjectMatchesNoneOfThem() {
+        // "alias" was resolved by Grouper under a uhUuid and uid that are not the submitted string, so it can't
+        // be matched from the bulk response: it is verified with a single lookup instead of being reported unknown.
+        List<String> identifiers = List.of("alias", "unknown", "00000001");
+        given(grouperService.getSubjects(identifiers))
+                .willReturn(subjectsResultsLikeGrouper(
+                        foundByUhNumber("00000001", "uidone"),
+                        foundByUhNumber("00000009", "uidnine"),
+                        notFoundEntry()));
+        given(grouperService.getSubjects("alias"))
+                .willReturn(subjectsResultsLikeGrouper(foundByUid("00000009", "alias")));
+        given(grouperService.getSubjects("unknown"))
+                .willReturn(subjectsResultsLikeGrouper(notFoundEntry()));
+
+        UhIdentifierValidationResult result = subjectService.validateUhIdentifiers(TEST_USER, identifiers);
+
+        assertEquals(List.of("00000009", "00000001"), result.getValidIdentifiers());
+        assertEquals(List.of("unknown"), result.getInvalidIdentifiers());
+        verify(grouperService, times(1)).getSubjects("alias");
+        verify(grouperService, times(1)).getSubjects("unknown");
+        verify(grouperService, times(1)).getSubjects(identifiers);
+    }
+
+    private SubjectsResults subjectsResultsLikeGrouper(WsSubject... entries) {
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode("SUCCESS");
+
+        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
+        wsGetSubjectsResults.setResultMetadata(resultMetadata);
+        wsGetSubjectsResults.setWsSubjects(entries);
+        return new SubjectsResults(wsGetSubjectsResults);
+    }
+
+    private WsSubject notFoundEntry() {
+        WsSubject subject = new WsSubject();
+        subject.setResultCode("SUBJECT_NOT_FOUND");
+        return subject;
+    }
+
+    /** A subject looked up by UH number: Grouper does not echo an identifier for it. */
+    private WsSubject foundByUhNumber(String uhNumber, String uid) {
+        WsSubject subject = new WsSubject();
+        subject.setResultCode("SUCCESS");
+        subject.setId(uhNumber);
+        subject.setAttributeValues(new String[] { uid, "Name", "Last", "First", "" });
+        return subject;
+    }
+
+    /** A subject looked up by uid: Grouper echoes the uid back as the identifier lookup. */
+    private WsSubject foundByUid(String uhNumber, String uid) {
+        WsSubject subject = foundByUhNumber(uhNumber, uid);
+        subject.setIdentifierLookup(uid);
+        return subject;
     }
 
     @Test

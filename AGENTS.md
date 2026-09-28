@@ -164,7 +164,7 @@ This distinction must be preserved everywhere identifiers are used.
 2. Method returns `CompletableFuture<T>` immediately
 3. Controller returns job ID (202 ACCEPTED)
 4. Caller polls `/api/groupings/v2.1/jobs/{jobId}` for results
-5. `AsyncJobResult` contains status, result, or error
+5. `AsyncJobResult` contains status and result. If the job failed, polling rethrows the job's real exception, so it maps to its own status (e.g. 503 when Grouper is unavailable, 403 when access is denied) rather than a generic 500
 
 **Async methods:**
 - `addIncludeMembersAsync()`
@@ -467,7 +467,7 @@ POST   /api/groupings/v2.1/members/async
 ### Async Job Management
 ```
 GET    /api/groupings/v2.1/jobs/{jobId}
-       → AsyncJobResult (job status, result, or error)
+       → AsyncJobResult (job status and result; a failed job returns the failure's own error status)
 ```
 
 ## Type System & Enums

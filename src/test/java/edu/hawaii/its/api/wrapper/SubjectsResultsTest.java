@@ -100,10 +100,10 @@ public class SubjectsResultsTest {
     }
 
     @Test
-    public void getSubjectsInRequestOrderReturnsOneSubjectPerRequestUnfiltered() {
+    public void getUnfilteredSubjectsReturnsEverySubjectGrouperAnsweredWith() {
         SubjectsResults subjectsResults =
                 groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
-        List<Subject> subjects = subjectsResults.getSubjectsInRequestOrder();
+        List<Subject> subjects = subjectsResults.getUnfilteredSubjects();
         assertNotNull(subjects);
         assertEquals(subjectsResults.getSubjects().size(), subjects.size());
 
@@ -117,10 +117,9 @@ public class SubjectsResultsTest {
     }
 
     @Test
-    public void getSubjectsInRequestOrderKeepsSuccessfulSubjectsThatGetSubjectsWouldFilterOut() {
-        // getSubjects() drops a successful-but-attribute-less ("orphan") subject entirely, which would
-        // desync a caller correlating each response back to the request identifier at that position.
-        // getSubjectsInRequestOrder() must keep it.
+    public void getUnfilteredSubjectsKeepsSuccessfulSubjectsThatGetSubjectsWouldFilterOut() {
+        // getSubjects() drops a successful-but-attribute-less ("orphan") subject entirely, which would make a
+        // caller validating identifiers report a resolved subject as unknown. getUnfilteredSubjects() must keep it.
         WsSubject orphan = new WsSubject();
         orphan.setResultCode(SUCCESS);
         orphan.setId("uhuuid-orphan");
@@ -138,16 +137,16 @@ public class SubjectsResultsTest {
 
         SubjectsResults subjectsResults = new SubjectsResults(wsGetSubjectsResults);
         assertEquals(1, subjectsResults.getSubjects().size());
-        assertEquals(2, subjectsResults.getSubjectsInRequestOrder().size());
-        assertEquals("uhuuid-orphan", subjectsResults.getSubjectsInRequestOrder().get(0).getUhUuid());
-        assertEquals("uhuuid-normal", subjectsResults.getSubjectsInRequestOrder().get(1).getUhUuid());
+        assertEquals(2, subjectsResults.getUnfilteredSubjects().size());
+        assertEquals("uhuuid-orphan", subjectsResults.getUnfilteredSubjects().get(0).getUhUuid());
+        assertEquals("uhuuid-normal", subjectsResults.getUnfilteredSubjects().get(1).getUhUuid());
     }
 
     @Test
-    public void getSubjectsInRequestOrderReturnsEmptyListForNoSubjects() {
+    public void getUnfilteredSubjectsReturnsEmptyListForNoSubjects() {
         SubjectsResults subjectsResults = new SubjectsResults();
-        assertNotNull(subjectsResults.getSubjectsInRequestOrder());
-        assertEquals(0, subjectsResults.getSubjectsInRequestOrder().size());
+        assertNotNull(subjectsResults.getUnfilteredSubjects());
+        assertEquals(0, subjectsResults.getUnfilteredSubjects().size());
     }
 
 }

@@ -107,6 +107,7 @@ public class ErrorControllerAdvice {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String path = attributes.getRequest().getRequestURI();
 
+        logger.error("Unhandled exception for path: " + path, e);
         emailService.sendWithStack(e, "Runtime Exception", path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
