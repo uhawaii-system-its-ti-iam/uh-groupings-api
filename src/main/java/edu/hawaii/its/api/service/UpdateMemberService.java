@@ -21,6 +21,7 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
@@ -157,9 +158,11 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                groupingPath + GroupType.EXCLUDE.value(), validIdentifiers);
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), validationResult.getValidIdentifiers());
+        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+        return result;
     }
 
     @Async
@@ -169,11 +172,13 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return CompletableFuture.supplyAsync(() ->
-                moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                        groupingPath + GroupType.EXCLUDE.value(), validIdentifiers)
-        );
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        return CompletableFuture.supplyAsync(() -> {
+            GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                    groupingPath + GroupType.EXCLUDE.value(), validationResult.getValidIdentifiers());
+            result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+            return result;
+        });
     }
 
     public GroupingMoveMemberResult addIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -190,9 +195,11 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                groupingPath + GroupType.INCLUDE.value(), validIdentifiers);
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                groupingPath + GroupType.INCLUDE.value(), validationResult.getValidIdentifiers());
+        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+        return result;
     }
 
     @Async
@@ -202,11 +209,13 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return CompletableFuture.supplyAsync(() ->
-                moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                        groupingPath + GroupType.INCLUDE.value(), validIdentifiers)
-        );
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        return CompletableFuture.supplyAsync(() -> {
+            GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                    groupingPath + GroupType.INCLUDE.value(), validationResult.getValidIdentifiers());
+            result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+            return result;
+        });
     }
 
     public GroupingMoveMemberResult addExcludeMember(String currentUser, String groupingPath, String uhIdentifier) {

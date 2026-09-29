@@ -1,8 +1,15 @@
 package edu.hawaii.its.api.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 
@@ -14,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
+import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
@@ -84,6 +92,99 @@ public class SubjectService {
             results.add(subject.getUhUuid());
         }
         return results;
+    }
+
+    /**
+     * Partition uhIdentifiers, in a single bulk Grouper lookup, into those that resolve to a valid Grouper
+     * subject and those that don't (malformed, or unknown to Grouper). Unlike getValidUhUuids, no identifier
+     * is silently dropped: every invalid identifier is reported back, in full, in the order submitted (e.g. the
+     * row order of an imported file), for the caller to display.
+     */
+    public UhIdentifierValidationResult validateUhIdentifiers(String currentUser, List<String> uhIdentifiers) {
+        List<String> uniqueIdentifiers = uhIdentifiers.stream().distinct().toList();
+        List<String> wellFormed = uniqueIdentifiers.stream().filter(this::isWellFormedIdentifier).toList();
+
+        if (wellFormed.size() != uniqueIdentifiers.size()) {
+            logger.warn(String.format("Malformed path input rejected from currentUser: %s;", currentUser));
+        }
+
+        Map<String, Subject> resolved = wellFormed.isEmpty() ? Map.of() : resolveSubjects(wellFormed);
+
+        Set<String> validIdentifiers = new LinkedHashSet<>();
+        Set<Subject> validSubjects = new LinkedHashSet<>();
+        List<String> invalidIdentifiers = new ArrayList<>();
+        for (String uhIdentifier : uniqueIdentifiers) {
+            Subject subject = resolved.get(uhIdentifier);
+            if (subject == null) {
+                invalidIdentifiers.add(uhIdentifier);
+                continue;
+            }
+            // A resolved subject is not guaranteed to carry a uhUuid (e.g. subjects sourced outside the standard
+            // UH identifier system), in which case the submitted identifier is what gets used.
+            String uhUuid = subject.getUhUuid();
+            validIdentifiers.add(uhUuid.isEmpty() ? uhIdentifier : uhUuid);
+            // Subject.equals() is by name/uid/uhUuid, so the same subject resolved from two submitted identifiers
+            // (e.g. both a uid and its UH number) collapses to one entry here too.
+            validSubjects.add(subject);
+        }
+        return new UhIdentifierValidationResult(
+                new ArrayList<>(validIdentifiers), invalidIdentifiers, new ArrayList<>(validSubjects));
+    }
+
+    /**
+     * Look up well-formed identifiers in one bulk Grouper call and return the subject each resolved identifier
+     * belongs to; identifiers Grouper doesn't know are absent from the map.
+     * <p>
+     * Grouper does not answer with one entry per lookup: lookups that resolve to nothing are collapsed into a
+     * single SUBJECT_NOT_FOUND entry, and lookups that resolve to the same subject can be too. The results are
+     * therefore matched to the submitted identifiers by the uhUuid and uid they carry, never by position or count.
+     */
+    private Map<String, Subject> resolveSubjects(List<String> uhIdentifiers) {
+        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifiers);
+        if (!subjectsResults.isSuccessful()) {
+            throw new GrouperException(
+                    "Grouper subject lookup failed (rawResultCode=" + subjectsResults.getRawResultCode() + ")");
+        }
+
+        Set<Subject> found = subjectsResults.getUnfilteredSubjects().stream()
+                .filter(subject -> subject.getResultCode().startsWith(SUCCESS))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Map<String, Subject> foundByKey = new HashMap<>();
+        for (Subject subject : found) {
+            foundByKey.put(lookupKey(subject.getUhUuid()), subject);
+            foundByKey.put(lookupKey(subject.getUid()), subject);
+        }
+        foundByKey.remove("");
+
+        Map<String, Subject> resolved = new HashMap<>();
+        Set<Subject> matched = new HashSet<>();
+        for (String uhIdentifier : uhIdentifiers) {
+            Subject subject = foundByKey.get(lookupKey(uhIdentifier));
+            if (subject != null) {
+                resolved.put(uhIdentifier, subject);
+                matched.add(subject);
+            }
+        }
+
+        // A subject Grouper resolved but that answers to none of the submitted identifiers means one of them was
+        // resolved under a form not recognised above. Verify the leftovers one at a time (a single lookup always
+        // returns exactly one entry) rather than report a real member as not found.
+        if (matched.size() < found.size()) {
+            for (String uhIdentifier : uhIdentifiers) {
+                if (!resolved.containsKey(uhIdentifier)) {
+                    Subject subject = getSubject(uhIdentifier);
+                    if (isValidSubject(subject)) {
+                        resolved.put(uhIdentifier, subject);
+                    }
+                }
+            }
+        }
+        return resolved;
+    }
+
+    private String lookupKey(String uhIdentifier) {
+        return uhIdentifier == null ? "" : uhIdentifier.toLowerCase(Locale.ROOT);
     }
 
     public String getValidUhUuid(String currentUser, String uhIdentifier) {

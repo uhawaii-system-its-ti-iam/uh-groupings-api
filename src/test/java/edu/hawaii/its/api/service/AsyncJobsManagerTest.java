@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.type.AsyncJobResult;
 
 @ActiveProfiles("localTest")
@@ -60,6 +62,35 @@ public class AsyncJobsManagerTest {
         AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, jobId);
         assertEquals("COMPLETED", asyncJobResult.getStatus());
         assertEquals("completedJob", asyncJobResult.getResult());
+    }
+
+    @Test
+    public void getJobResultRethrowsTheRealFailureOfAFailedJob() {
+        // An @Async method that throws completes its future with a CompletionException wrapping the failure.
+        Integer grouperJobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new GrouperException("Grouper unavailable"))));
+        assertThrows(GrouperException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, grouperJobId));
+
+        Integer deniedJobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new AccessDeniedException())));
+        assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, deniedJobId));
+    }
+
+    @Test
+    public void getJobResultRethrowsAFailedJobOnlyOnce() {
+        Integer jobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new GrouperException("Grouper unavailable"))));
+        assertThrows(GrouperException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, jobId));
+        assertEquals("NOT_FOUND", asyncJobsManager.getJobResult(CURRENT_USER, jobId).getStatus());
+    }
+
+    @Test
+    public void getJobResultKeepsTheWrapperWhenTheFailureIsNotARuntimeException() {
+        Integer jobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new Exception("checked"))));
+        CompletionException e =
+                assertThrows(CompletionException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, jobId));
+        assertEquals("checked", e.getCause().getMessage());
     }
 
     @Test
