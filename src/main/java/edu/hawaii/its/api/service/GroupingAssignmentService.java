@@ -56,8 +56,8 @@ public class GroupingAssignmentService {
     /**
      * A list of grouping paths for all groupings, restricted to admins' use only.
      */
-    public GroupingPaths allGroupingPaths(String adminUhIdentifier) {
-        logger.info(String.format("allGroupings; adminUhIdentifier: %s;", adminUhIdentifier));
+    public GroupingPaths allGroupingPaths() {
+        logger.info("allGroupings");
         // Use JWT for general admin check instead of querying Grouper
         // Note: adminUhIdentifier is the currentUser from the controller
         if (!memberService.isCurrentUserAdmin()) {
@@ -172,7 +172,7 @@ public class GroupingAssignmentService {
      * Get number of direct owners in a grouping.
      */
     public Integer numberOfDirectOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("groupingDirectOwners; currentUser: %s; groupingPath: %s;",
+        logger.info(String.format("numberOfDirectOwners; currentUser: %s; groupingPath: %s;",
                 currentUser, groupingPath));
         // Check specific grouping ownership (Grouper) OR general admin role (JWT)
         if (!memberService.isCurrentUserAdmin() && !memberService.isOwner(groupingPath, currentUser)) {

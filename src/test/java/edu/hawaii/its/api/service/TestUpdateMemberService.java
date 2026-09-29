@@ -23,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.controller.WithMockUhAdmin;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
@@ -30,6 +31,7 @@ import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.OptType;
+
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
 @ActiveProfiles("integrationTest")
@@ -101,6 +103,7 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void addRemoveAdminTest() {
         // With uh number.
         assertFalse(memberService.isAdmin(testUhUuids.get(0)));
@@ -132,24 +135,22 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void checkIfAdminUserTest() {
         try {
-            updateMemberService.checkIfAdminUser(testUhUuids.get(0));
-            fail("Should throw an exception if identifier is not an admin.");
-        } catch (AccessDeniedException e) {
-            assertNull(e.getCause());
-        }
-        try {
-            updateMemberService.checkIfAdminUser(testUids.get(0));
-            fail("Should throw an exception if identifier is not an admin.");
-        } catch (AccessDeniedException e) {
-            assertNull(e.getCause());
-        }
-
-        try {
-            updateMemberService.checkIfAdminUser(ADMIN);
+            updateMemberService.checkIfAdminUser();
         } catch (AccessDeniedException e) {
             fail("Should not throw exception if current user is admin.");
+        }
+    }
+
+    @Test
+    public void checkIfAdminUserAccessDeniedTest() {
+        try {
+            updateMemberService.checkIfAdminUser();
+            fail("Should throw an exception if current user is not an admin.");
+        } catch (AccessDeniedException e) {
+            assertNull(e.getCause());
         }
     }
 
@@ -282,6 +283,7 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void optTest() {
         String num = testUhUuids.get(0);
         assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
@@ -307,6 +309,7 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void removeFromGroupsTest() {
         String uhNum = testUhUuids.get(0);
 
@@ -376,6 +379,7 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void addRemoveOwnershipsTest() {
         updateMemberService.addOwnerships(ADMIN, GROUPING, testUids);
         for (String uid : testUids) {
@@ -389,6 +393,7 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void addRemoveOwnershipsExceptionsTest() {
         Integer originalLimit = (Integer) ReflectionTestUtils.getField(updateMemberService, "OWNERS_LIMIT");
         ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", 4);
@@ -416,6 +421,7 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void addRemoveOwnershipTest() {
         String uid = testUids.get(0);
         updateMemberService.addOwnership(ADMIN, GROUPING, uid);
@@ -429,6 +435,7 @@ public class TestUpdateMemberService {
 
     @Test
     public void checkIfOwnerOrAdminUserTest() {
+        MockSecurityContext.setAdminContext();
         // Should not throw an exception if current user is an admin and an owner.
         try {
             updateMemberService.checkIfOwnerOrAdminUser(ADMIN, GROUPING);
@@ -436,16 +443,8 @@ public class TestUpdateMemberService {
             fail("Should not throw an exception if current user is an admin and an owner.");
         }
 
-        // Should not throw an exception if current user is an owner of grouping.
-        addGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
-        try {
-            updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
-        } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user is an owner of grouping.");
-        }
-
         // Should not throw an exception if current user is an owner of grouping and an admin.
-        addGroupMember(GROUPING_ADMINS, testUhUuids.get(0));
+        addGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
         try {
             updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
         } catch (AccessDeniedException e) {
@@ -457,9 +456,18 @@ public class TestUpdateMemberService {
         try {
             updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
         } catch (AccessDeniedException e) {
-            fail("Should not throw an exception if current user an admin but not an owner of grouping.");
+            fail("Should not throw an exception if current user is an admin but not an owner of grouping.");
         }
-        removeGroupMember(GROUPING_ADMINS, testUhUuids.get(0));
+
+        MockSecurityContext.clearContext();
+        // Should not throw an exception if current user is an owner of grouping.
+        addGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
+        try {
+            updateMemberService.checkIfOwnerOrAdminUser(testUhUuids.get(0), GROUPING);
+        } catch (AccessDeniedException e) {
+            fail("Should not throw an exception if current user is an owner of grouping.");
+        }
+        removeGroupMember(GROUPING_OWNERS, testUhUuids.get(0));
 
         // Should throw is not an admin or an owner of grouping.
         try {
@@ -471,14 +479,8 @@ public class TestUpdateMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void checkIfSelfOptOrAdminTest() {
-        try {
-            updateMemberService.checkIfSelfOptOrAdmin(testUhUuids.get(0), testUhUuids.get(1));
-            fail("Should throw an exception if currentUser is not admin and currentUser is not self opting.");
-        } catch (AccessDeniedException e) {
-            assertNull(e.getCause());
-        }
-
         try {
             updateMemberService.checkIfSelfOptOrAdmin(ADMIN, testUhUuids.get(0));
         } catch (AccessDeniedException e) {
@@ -491,12 +493,22 @@ public class TestUpdateMemberService {
             fail("Should not throw an exception if currentUser is admin and currentUser is self opting.");
         }
 
+    }
+
+    @Test
+    public void checkifSelfOptOrAdminNonAdminTest() {
+        try {
+            updateMemberService.checkIfSelfOptOrAdmin(testUhUuids.get(0), testUhUuids.get(1));
+            fail("Should throw an exception if currentUser is not admin and currentUser is not self opting.");
+        } catch (AccessDeniedException e) {
+            assertNull(e.getCause());
+        }
+
         try {
             updateMemberService.checkIfSelfOptOrAdmin(testUhUuids.get(0), testUhUuids.get(0));
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if currentUser is not admin but currentUser is self opting.");
         }
-
     }
 
     @Test
@@ -525,6 +537,7 @@ public class TestUpdateMemberService {
     //    }
 
     @Test
+    @WithMockUhAdmin
     public void validateOptInActionForAlreadyOptedUser() {
         String testUid = testUhUuids.get(0);
         updateMemberService.addAdminMember(ADMIN, testUid);

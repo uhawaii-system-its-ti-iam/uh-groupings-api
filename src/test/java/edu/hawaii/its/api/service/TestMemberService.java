@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.controller.WithMockUhAdmin;
 
 import java.util.Collections;
 
@@ -54,6 +55,7 @@ public class TestMemberService {
     }
 
     @Test
+    @WithMockUhAdmin
     public void isAdmin() {
         assertTrue(memberService.isAdmin(ADMIN));
 
