@@ -3,8 +3,13 @@ package edu.hawaii.its.api.controller;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,6 +17,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
+import edu.hawaii.its.api.service.EmailService;
+import edu.hawaii.its.api.type.ApiError;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,6 +132,32 @@ public class ErrorControllerAdviceTest {
         statusCode = errorControllerAdvice.handleInvalidGroupPathException(igpe).getStatusCode().toString();
         assertThat(statusCode, is("400 BAD_REQUEST"));
     }
+
+    @Test
+    public void testSignatureException() {
+        EmailService emailService = mock(EmailService.class);
+        ErrorControllerAdvice advice = new ErrorControllerAdvice(emailService);
+        SignatureException ex = new SignatureException("bad signature");
+
+        org.springframework.http.ResponseEntity<ApiError> response = advice.handleJwtSignatureException(ex);
+
+        assertEquals(org.springframework.http.HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("SECURITY ALERT: JWT Signature Mismatch", response.getBody().getMessage());
+        verify(emailService).sendWithStack(eq(ex), eq("SECURITY ALERT: JWT Signature Mismatch"), anyString());
+    }
+
+    @Test
+    public void testJwtException() {
+        EmailService emailService = mock(EmailService.class);
+        ErrorControllerAdvice advice = new ErrorControllerAdvice(emailService);
+        JwtException ex = new JwtException("jwt error");
+
+        org.springframework.http.ResponseEntity<ApiError> response = advice.handleJwtException(ex);
+
+        assertEquals(org.springframework.http.HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("JWT Exception", response.getBody().getMessage());
+        verify(emailService).sendWithStack(eq(ex), eq("JWT Exception"), anyString());
+    } 
 
     @Test
     @WithMockUhOwner

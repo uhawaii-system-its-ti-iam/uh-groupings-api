@@ -11,8 +11,6 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -103,7 +101,7 @@ public class TestJwtAuthenticationFilter {
     }
 
     @Test
-    public void invalidTokenSignatureTest() {
+    public void invalidTokenSignatureTest() throws Exception {
         String badSecretKey = "badsecretkeybadsecretkeybadsecretkeybadsecretkey";
         String invalidToken = generateToken(TEST_ADMIN, ADMIN_ROLES, TEST_EXPIRATION_TIME, badSecretKey);
 
@@ -112,16 +110,20 @@ public class TestJwtAuthenticationFilter {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        assertThrows(SignatureException.class, () ->
-            jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
-        );
+        // The filter now hands JwtException off to ErrorControllerAdvice (via HandlerExceptionResolver)
+        // instead of letting it escape, so the response reflects handleJwtSignatureException's FORBIDDEN
+        // status rather than an exception propagating out of doFilterInternal.
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertEquals(403, response.getStatus());
+        assertTrue(response.getContentAsString().contains("SECURITY ALERT: JWT Signature Mismatch"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNull(auth, "Authentication should not be set when token signature is invalid");
     }
 
     @Test
-    public void expiredTokenTest() {
+    public void expiredTokenTest() throws Exception {
         String expiredToken = generateToken(TEST_ADMIN, ADMIN_ROLES, -1000L);
 
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -129,9 +131,12 @@ public class TestJwtAuthenticationFilter {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        assertThrows(ExpiredJwtException.class, () ->
-            jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
-        );
+        // ExpiredJwtException is a JwtException subtype without its own handler, so it falls through
+        // to handleJwtException's catch-all instead of escaping doFilterInternal.
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertEquals(403, response.getStatus());
+        assertTrue(response.getContentAsString().contains("JWT Exception"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNull(auth, "Authentication should not be set when token is expired");
