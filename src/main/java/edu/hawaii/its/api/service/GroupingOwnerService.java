@@ -5,6 +5,7 @@ import static edu.hawaii.its.api.service.PathFilter.parentGroupingPath;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -242,7 +243,7 @@ public class GroupingOwnerService {
                     groupingPath);
 
             List<GroupingSyncDestination> syncDestinationList =
-                    createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults);
+                    createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults, groupingPath);
 
             return new GroupingSyncDestinations(findAttributesResults, groupAttributeResults, syncDestinationList);
         } catch (Exception e) {
@@ -258,14 +259,31 @@ public class GroupingOwnerService {
      */
     public List<GroupingSyncDestination> createGroupingSyncDestinationList(FindAttributesResults
             findAttributesResults, GroupAttributeResults groupAttributeResults) {
+        return createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults, null);
+    }
+
+    public List<GroupingSyncDestination> createGroupingSyncDestinationList(FindAttributesResults
+            findAttributesResults, GroupAttributeResults groupAttributeResults, String groupingPath) {
         List<AttributesResult> attributesResults = findAttributesResults.getResults();
         List<GroupingSyncDestination> syncDestinationList = new ArrayList<>();
         List<Exception> syncDestinationErrors = new ArrayList<>();
         List<String> syncDestinationErrorMessages = new ArrayList<>();
-        String groupExtension = groupAttributeResults.getGroups().stream()
+        String groupPath = groupAttributeResults.getGroups().stream()
+                .findFirst()
+                .map(Group::getGroupPath)
+                .filter(path -> path != null && !path.isBlank())
+                .orElse(groupingPath != null ? groupingPath : "");
+        String groupName = groupAttributeResults.getGroups().stream()
                 .findFirst()
                 .map(Group::getExtension)
-                .orElse("");
+                .filter(extension -> extension != null && !extension.isBlank())
+                .orElseGet(() -> {
+                    if (groupPath == null || groupPath.isBlank()) {
+                        return "";
+                    }
+                    int lastColon = groupPath.lastIndexOf(':');
+                    return lastColon >= 0 ? groupPath.substring(lastColon + 1) : groupPath;
+                });
         for (AttributesResult attributesResult : attributesResults) {
             String name = attributesResult.getName();
             try {
@@ -291,12 +309,34 @@ public class GroupingOwnerService {
                             "deserialized GroupingSyncDestination has a null description field — "
                                     + "JSON is missing the \"description\" property");
                 }
-                groupingSyncDestination.setDescription(destinationDescription
-                        .replaceFirst("\\$\\{srhfgs}", groupExtension));
+                String resolvedDescription = destinationDescription
+                        .replace("${srhfgs}", groupName)
+                        .replace("#${srhfgs}", "#" + groupName)
+                        .replace("#uh-iam-group", "#" + groupName)
+                        .replace("uh-iam-group", groupName);
+                groupingSyncDestination.setDescription(resolvedDescription);
 
                 if (groupingSyncDestination.getTooltip() != null) {
                     groupingSyncDestination.setTooltip(groupingSyncDestination.getTooltip()
-                            .replaceFirst("\\$\\{srhfgs}", groupExtension));
+                            .replace("${srhfgs}", groupName)
+                            .replace("#${srhfgs}", "#" + groupName)
+                            .replace("#uh-iam-group", "#" + groupName)
+                            .replace("uh-iam-group", groupName));
+                }
+                boolean referencesGrouping = groupName.isBlank()
+                        || resolvedDescription.contains(groupName)
+                        || (!groupPath.isBlank() && resolvedDescription.contains(groupPath.substring(
+                        Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+                boolean shouldFilterByGrouping = groupingPath != null && !groupingPath.isBlank();
+
+                if (!shouldFilterByGrouping) {
+                    referencesGrouping = true;
+                }
+
+                if (!name.contains("uhReleasedGrouping") && !referencesGrouping) {
+                    log.info(String.format("Skipping sync destination '%s' because it does not reference grouping '%s'",
+                            name, groupName));
+                    continue;
                 }
                 groupingSyncDestination.setSynced(groupAttributeResults.getGroupAttributes().stream()
                         .anyMatch(groupAttribute -> groupAttribute.getAttributeName()
@@ -313,6 +353,43 @@ public class GroupingOwnerService {
         if (!syncDestinationErrors.isEmpty()) {
             sendSyncDestinationErrorEmail(
                     createSyncDestinationError(syncDestinationErrors, syncDestinationErrorMessages));
+        }
+        if (groupingPath != null && !groupingPath.isBlank() && !groupName.isBlank()) {
+            syncDestinationList = syncDestinationList.stream()
+                    .filter(destination -> {
+                        String destinationName = destination.getName();
+                        if (destinationName != null && destinationName.contains("uhReleasedGrouping")) {
+                            return true;
+                        }
+                        String destinationDescription =
+                                destination.getDescription() == null ? "" : destination.getDescription();
+                        String destinationTooltip =
+                                destination.getTooltip() == null ? "" : destination.getTooltip();
+                        String destinationText = destinationDescription + " " + destinationTooltip;
+                        boolean referencesGrouping = destinationText.contains(groupName)
+                                || (!groupPath.isBlank() && destinationText.contains(groupPath.substring(
+                                Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+                        return referencesGrouping;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        if (findAttributesResults != null && findAttributesResults.getResults() != null) {
+            List<String> validNames = syncDestinationList.stream()
+                    .map(GroupingSyncDestination::getName)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            List<AttributesResult> filteredResults = new ArrayList<>(findAttributesResults.getResults())
+                    .stream()
+                    .filter(r -> r != null && r.getName() != null && validNames.contains(r.getName()))
+                    .collect(Collectors.toList());
+
+
+
+
+
+
         }
         syncDestinationList.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
         return syncDestinationList;
