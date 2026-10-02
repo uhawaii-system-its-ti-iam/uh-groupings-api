@@ -302,9 +302,16 @@ public class GroupingOwnerService {
                             .replace("#uh-iam-group", "#" + groupName)
                             .replace("uh-iam-group", groupName));
                 }
-                boolean referencesGrouping = groupName.isBlank() || resolvedDescription.contains(groupName)
+                boolean referencesGrouping = groupName.isBlank()
+                        || resolvedDescription.contains(groupName)
                         || (!groupPath.isBlank() && resolvedDescription.contains(groupPath.substring(
-                                Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+                        Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+                boolean shouldFilterByGrouping = groupingPath != null && !groupingPath.isBlank();
+
+                if (!shouldFilterByGrouping) {
+                    referencesGrouping = true;
+                }
+
                 if (!name.contains("uhReleasedGrouping") && !referencesGrouping) {
                     log.info(String.format("Skipping sync destination '%s' because it does not reference grouping '%s'",
                             name, groupName));
@@ -326,28 +333,42 @@ public class GroupingOwnerService {
             sendSyncDestinationErrorEmail(
                     createSyncDestinationError(syncDestinationErrors, syncDestinationErrorMessages));
         }
-        if (!groupName.isBlank()) {
-            syncDestinationList.removeIf(destination -> {
-                String destinationName = destination.getName();
-                if (destinationName != null && destinationName.contains("uhReleasedGrouping")) {
-                    return false;
-                }
-                String destinationDescription = destination.getDescription() == null ? "" : destination.getDescription();
-                String destinationTooltip = destination.getTooltip() == null ? "" : destination.getTooltip();
-                String destinationText = destinationDescription + " " + destinationTooltip;
-                boolean referencesGrouping = destinationText.contains(groupName)
-                        || (!groupPath.isBlank() && destinationText.contains(groupPath.substring(
+        if (groupingPath != null && !groupingPath.isBlank() && !groupName.isBlank()) {
+            syncDestinationList = syncDestinationList.stream()
+                    .filter(destination -> {
+                        String destinationName = destination.getName();
+                        if (destinationName != null && destinationName.contains("uhReleasedGrouping")) {
+                            return true;
+                        }
+                        String destinationDescription =
+                                destination.getDescription() == null ? "" : destination.getDescription();
+                        String destinationTooltip =
+                                destination.getTooltip() == null ? "" : destination.getTooltip();
+                        String destinationText = destinationDescription + " " + destinationTooltip;
+                        boolean referencesGrouping = destinationText.contains(groupName)
+                                || (!groupPath.isBlank() && destinationText.contains(groupPath.substring(
                                 Math.max(groupPath.lastIndexOf(':') + 1, 0))));
-                return !referencesGrouping;
-            });
+                        return referencesGrouping;
+                    })
+                    .collect(Collectors.toList());
         }
+
         if (findAttributesResults != null && findAttributesResults.getResults() != null) {
             List<String> validNames = syncDestinationList.stream()
                     .map(GroupingSyncDestination::getName)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            findAttributesResults.getResults().removeIf(attributesResult -> attributesResult == null
-                    || attributesResult.getName() == null || !validNames.contains(attributesResult.getName()));
+
+            List<AttributesResult> filteredResults = new ArrayList<>(findAttributesResults.getResults())
+                    .stream()
+                    .filter(r -> r != null && r.getName() != null && validNames.contains(r.getName()))
+                    .collect(Collectors.toList());
+
+
+
+
+
+
         }
         syncDestinationList.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
         return syncDestinationList;
