@@ -21,52 +21,56 @@ public class RoleTest {
     }
 
     @Test
-    public void fromClaimResolvesThePlainContractForm() {
-        assertThat(Role.fromClaim("ADMIN"), equalTo(Optional.of(Role.ADMIN)));
-        assertThat(Role.fromClaim("OWNER"), equalTo(Optional.of(Role.OWNER)));
-        assertThat(Role.fromClaim("UH"), equalTo(Optional.of(Role.UH)));
+    public void authorityNameFromClaimPrefixesThePlainContractForm() {
+        assertThat(Role.authorityNameFromClaim("ADMIN"), equalTo(Optional.of("ROLE_ADMIN")));
+        assertThat(Role.authorityNameFromClaim("OWNER"), equalTo(Optional.of("ROLE_OWNER")));
+        assertThat(Role.authorityNameFromClaim("UH"), equalTo(Optional.of("ROLE_UH")));
     }
 
     @Test
-    public void fromClaimResolvesThePrefixedFormSentByOlderUiBuilds() {
-        assertThat(Role.fromClaim("ROLE_ADMIN"), equalTo(Optional.of(Role.ADMIN)));
-        assertThat(Role.fromClaim("ROLE_OWNER"), equalTo(Optional.of(Role.OWNER)));
+    public void authorityNameFromClaimLeavesThePrefixedFormAlone() {
+        assertThat(Role.authorityNameFromClaim("ROLE_ADMIN"), equalTo(Optional.of("ROLE_ADMIN")));
+        assertThat(Role.authorityNameFromClaim("ROLE_OWNER"), equalTo(Optional.of("ROLE_OWNER")));
     }
 
     @Test
-    public void fromClaimIgnoresSurroundingWhitespaceAndCase() {
-        assertThat(Role.fromClaim("  admin  "), equalTo(Optional.of(Role.ADMIN)));
-        assertThat(Role.fromClaim("role_admin"), equalTo(Optional.of(Role.ADMIN)));
+    public void authorityNameFromClaimIgnoresSurroundingWhitespaceAndCase() {
+        assertThat(Role.authorityNameFromClaim("  admin  "), equalTo(Optional.of("ROLE_ADMIN")));
+        assertThat(Role.authorityNameFromClaim("role_admin"), equalTo(Optional.of("ROLE_ADMIN")));
     }
 
     @Test
-    public void fromClaimRejectsUnknownNames() {
-        assertTrue(Role.fromClaim("ADMINISTRATOR").isEmpty());
-        assertTrue(Role.fromClaim("ROLE_ADMINISTRATOR").isEmpty());
-        assertTrue(Role.fromClaim("SUPERUSER").isEmpty());
-        assertTrue(Role.fromClaim("").isEmpty());
-        assertTrue(Role.fromClaim(null).isEmpty());
+    public void authorityNameFromClaimRejectsUnknownNames() {
+        assertTrue(Role.authorityNameFromClaim("ADMINISTRATOR").isEmpty());
+        assertTrue(Role.authorityNameFromClaim("ROLE_ADMINISTRATOR").isEmpty());
+        assertTrue(Role.authorityNameFromClaim("SUPERUSER").isEmpty());
+        assertTrue(Role.authorityNameFromClaim("").isEmpty());
+        assertTrue(Role.authorityNameFromClaim(null).isEmpty());
     }
 
     @Test
-    public void fromClaimDoesNotStripMoreThanOnePrefix() {
-        assertTrue(Role.fromClaim("ROLE_ROLE_ADMIN").isEmpty());
+    public void authorityNameFromClaimNeverDoublePrefixes() {
+        // A prefixed claim skips the prefixing step, so it never picks up a second one.
+        assertTrue(Role.authorityNameFromClaim("ROLE_ROLE_ADMIN").isEmpty());
+        assertThat(Role.authorityNameFromClaim("ROLE_ADMIN"), equalTo(Optional.of("ROLE_ADMIN")));
     }
 
     @Test
-    public void everyRoleRoundTripsThroughItsAuthorityName() {
+    public void everyRoleIsResolvedFromBothFormsOfItsClaim() {
         for (Role role : Role.values()) {
-            assertThat(Role.fromClaim(role.name()), equalTo(Optional.of(role)));
-            assertThat(Role.fromClaim(role.authorityName()), equalTo(Optional.of(role)));
+            assertThat(Role.authorityNameFromClaim(role.name()),
+                    equalTo(Optional.of(role.authorityName())));
+            assertThat(Role.authorityNameFromClaim(role.authorityName()),
+                    equalTo(Optional.of(role.authorityName())));
         }
     }
 
     @Test
     public void roleNamesMatchTheUiContract() {
-        // These names are the wire contract with ui/src/lib/access/role.ts; renaming one
-        // here silently drops the matching authority for every user that carries it.
+        // Wire contract with ui/src/lib/access/role.ts; renaming one here silently drops
+        // the matching authority for every user that carries it.
         assertThat(Role.values().length, equalTo(5));
-        assertFalse(Role.fromClaim("DEPARTMENT").isPresent());
-        assertTrue(Role.fromClaim("DEPARTMENTAL").isPresent());
+        assertFalse(Role.authorityNameFromClaim("DEPARTMENT").isPresent());
+        assertTrue(Role.authorityNameFromClaim("DEPARTMENTAL").isPresent());
     }
 }

@@ -47,8 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Authenticate and validate the token
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtService.isTokenValid(jwt)) {
-            // Map the roles claim onto Spring Security authorities, which is where the
-            // ROLE_ prefix gets applied. The token carries plain role names.
+            // Map the roles claim onto Spring Security authorities; the token may carry
+            // either the plain role name or one already in authority form.
             List<String> roles = jwtService.extractRoles(jwt);
             List<GrantedAuthority> authorities = jwtRoleConverter.convert(roles);
 
