@@ -33,7 +33,7 @@ public class JwtRoleConverterTest {
     }
 
     @Test
-    public void convertDoesNotDoublePrefixRolesFromAnOlderUi() {
+    public void convertCarriesAlreadyPrefixedRolesThroughUnchanged() {
         List<GrantedAuthority> authorities = jwtRoleConverter.convert(List.of("ROLE_ADMIN", "ROLE_UH"));
 
         assertThat(authorities, equalTo(List.of(

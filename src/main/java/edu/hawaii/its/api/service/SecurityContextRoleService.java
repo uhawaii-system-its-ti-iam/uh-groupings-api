@@ -11,8 +11,8 @@ import edu.hawaii.its.api.type.Role;
  * This service is used for general authorization checks (is admin? is owner?)
  * without querying Grouper, as these roles are already embedded in the JWT token.
  *
- * The authorities compared here are produced by JwtRoleConverter, which is what applies
- * the ROLE_ prefix; Role.authorityName() is the single definition of that authority name.
+ * The authorities compared here come from the JWT via JwtRoleConverter;
+ * Role.authorityName() is the single definition of the authority name.
  *
  * For specific grouping ownership checks, use MemberService.isOwner(groupingPath, uhIdentifier)
  * which still queries Grouper.
