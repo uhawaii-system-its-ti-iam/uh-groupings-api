@@ -271,14 +271,14 @@ public class GroupingOwnerService {
         String groupPath = groupAttributeResults.getGroups().stream()
                 .findFirst()
                 .map(Group::getGroupPath)
-                .filter(path -> path != null && !path.isBlank())
+                .filter(path -> !path.isBlank())
                 .orElse(groupingPath != null ? groupingPath : "");
         String groupName = groupAttributeResults.getGroups().stream()
                 .findFirst()
                 .map(Group::getExtension)
-                .filter(extension -> extension != null && !extension.isBlank())
+                .filter(extension -> !extension.isBlank())
                 .orElseGet(() -> {
-                    if (groupPath == null || groupPath.isBlank()) {
+                    if (groupPath.isBlank()) {
                         return "";
                     }
                     int lastColon = groupPath.lastIndexOf(':');
@@ -366,30 +366,24 @@ public class GroupingOwnerService {
                         String destinationTooltip =
                                 destination.getTooltip() == null ? "" : destination.getTooltip();
                         String destinationText = destinationDescription + " " + destinationTooltip;
-                        boolean referencesGrouping = destinationText.contains(groupName)
+                        return destinationText.contains(groupName)
                                 || (!groupPath.isBlank() && destinationText.contains(groupPath.substring(
                                 Math.max(groupPath.lastIndexOf(':') + 1, 0))));
-                        return referencesGrouping;
                     })
                     .collect(Collectors.toList());
         }
 
-        if (findAttributesResults != null && findAttributesResults.getResults() != null) {
+        if (findAttributesResults.getResults() != null) {
             List<String> validNames = syncDestinationList.stream()
                     .map(GroupingSyncDestination::getName)
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 
             List<AttributesResult> filteredResults = new ArrayList<>(findAttributesResults.getResults())
                     .stream()
                     .filter(r -> r != null && r.getName() != null && validNames.contains(r.getName()))
                     .collect(Collectors.toList());
-
-
-
-
-
-
+            findAttributesResults.setResults(filteredResults);
         }
         syncDestinationList.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
         return syncDestinationList;
@@ -409,7 +403,7 @@ public class GroupingOwnerService {
         try {
             ServletRequestAttributes attributes =
                     (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            String path = attributes != null && attributes.getRequest() != null
+            String path = attributes != null
                     ? attributes.getRequest().getRequestURI()
                     : "unknown";
             emailService.sendWithStack(e, "Sync Destination Error", path);
