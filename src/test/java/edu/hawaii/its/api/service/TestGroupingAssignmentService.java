@@ -270,18 +270,25 @@ public class TestGroupingAssignmentService {
     @Test
     public void numberOfImmediateOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
-        int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
+        int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING);
+
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
-        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+        assertEquals(initialOwners + 1,
+                groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING));
+
         updateMemberService.removeOwnerships(ADMIN, GROUPING, Collections.singletonList(testUid));
-        assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+        assertEquals(initialOwners,
+                groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING));
 
         //Owner-Grouping
         updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        assertEquals(initialOwners + 1, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+        assertEquals(initialOwners + 1,
+                groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING));
+
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-        assertEquals(initialOwners, groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN));
+        assertEquals(initialOwners,
+                groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING));
     }
 
     @Test

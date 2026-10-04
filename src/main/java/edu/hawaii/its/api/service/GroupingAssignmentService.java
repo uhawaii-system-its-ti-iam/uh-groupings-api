@@ -126,9 +126,9 @@ public class GroupingAssignmentService {
      * Get number of immediate owners in a grouping. Owners with "IMMEDIATE" filter.
      * It includes direct owners + owner-groupings.
      */
-    public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
-        logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
-                currentUser, groupPath, uhIdentifier));
+    public Integer numberOfImmediateOwners(String currentUser, String groupPath) {
+        logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s;",
+                currentUser, groupPath));
         if (!memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
