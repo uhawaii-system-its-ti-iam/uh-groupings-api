@@ -262,87 +262,33 @@ public class GroupingOwnerService {
         return createGroupingSyncDestinationList(findAttributesResults, groupAttributeResults, null);
     }
 
-    public List<GroupingSyncDestination> createGroupingSyncDestinationList(FindAttributesResults
-            findAttributesResults, GroupAttributeResults groupAttributeResults, String groupingPath) {
+    public List<GroupingSyncDestination> createGroupingSyncDestinationList(
+            FindAttributesResults findAttributesResults,
+            GroupAttributeResults groupAttributeResults,
+            String groupingPath) {
         List<AttributesResult> attributesResults = findAttributesResults.getResults();
         List<GroupingSyncDestination> syncDestinationList = new ArrayList<>();
         List<Exception> syncDestinationErrors = new ArrayList<>();
         List<String> syncDestinationErrorMessages = new ArrayList<>();
-        String groupPath = groupAttributeResults.getGroups().stream()
-                .findFirst()
-                .map(Group::getGroupPath)
-                .filter(path -> !path.isBlank())
-                .orElse(groupingPath != null ? groupingPath : "");
-        String groupName = groupAttributeResults.getGroups().stream()
-                .findFirst()
-                .map(Group::getExtension)
-                .filter(extension -> !extension.isBlank())
-                .orElseGet(() -> {
-                    if (groupPath.isBlank()) {
-                        return "";
-                    }
-                    int lastColon = groupPath.lastIndexOf(':');
-                    return lastColon >= 0 ? groupPath.substring(lastColon + 1) : groupPath;
-                });
+        String groupPath = getGroupPath(groupAttributeResults, groupingPath);
+        String groupName = getGroupName(groupAttributeResults, groupPath);
+
         for (AttributesResult attributesResult : attributesResults) {
             String name = attributesResult.getName();
             try {
-                String rawDescription = attributesResult.getDescription();
-                if (rawDescription == null || rawDescription.isBlank()) {
-                    throw new IllegalArgumentException(
-                            "description field is null or blank — cannot deserialize GroupingSyncDestination");
-                }
-
                 GroupingSyncDestination groupingSyncDestination =
-                        JsonUtil.asObject(rawDescription, GroupingSyncDestination.class);
-
-                if (groupingSyncDestination == null) {
-                    throw new IllegalStateException(
-                            "JsonUtil.asObject returned null — description may contain the literal string \"null\"");
-                }
-
+                        createGroupingSyncDestination(attributesResult);
                 groupingSyncDestination.setName(name);
-
-                String destinationDescription = groupingSyncDestination.getDescription();
-                if (destinationDescription == null) {
-                    throw new IllegalStateException(
-                            "deserialized GroupingSyncDestination has a null description field — "
-                                    + "JSON is missing the \"description\" property");
-                }
-                String resolvedDescription = destinationDescription
-                        .replace("${srhfgs}", groupName)
-                        .replace("#${srhfgs}", "#" + groupName)
-                        .replace("#uh-iam-group", "#" + groupName)
-                        .replace("uh-iam-group", groupName);
-                groupingSyncDestination.setDescription(resolvedDescription);
-
-                if (groupingSyncDestination.getTooltip() != null) {
-                    groupingSyncDestination.setTooltip(groupingSyncDestination.getTooltip()
-                            .replace("${srhfgs}", groupName)
-                            .replace("#${srhfgs}", "#" + groupName)
-                            .replace("#uh-iam-group", "#" + groupName)
-                            .replace("uh-iam-group", groupName));
-                }
-                boolean referencesGrouping = groupName.isBlank()
-                        || resolvedDescription.contains(groupName)
-                        || (!groupPath.isBlank() && resolvedDescription.contains(groupPath.substring(
-                        Math.max(groupPath.lastIndexOf(':') + 1, 0))));
-                boolean shouldFilterByGrouping = groupingPath != null && !groupingPath.isBlank();
-
-                if (!shouldFilterByGrouping) {
-                    referencesGrouping = true;
-                }
-
-                if (!name.contains("uhReleasedGrouping") && !referencesGrouping) {
-                    log.info(String.format("Skipping sync destination '%s' because it does not reference grouping '%s'",
-                            name, groupName));
+                String resolvedDescription =
+                        processGroupingSyncDestination(groupingSyncDestination, groupName);
+                if (shouldSkipGroupingSyncDestination(
+                        name, groupName, groupPath, resolvedDescription, groupingPath)) {
                     continue;
                 }
-                groupingSyncDestination.setSynced(groupAttributeResults.getGroupAttributes().stream()
-                        .anyMatch(groupAttribute -> groupAttribute.getAttributeName()
-                                .equals(attributesResult.getName())));
+                groupingSyncDestination.setSynced(
+                        isGroupingSyncDestinationSynced(
+                                groupAttributeResults, attributesResult.getName()));
                 syncDestinationList.add(groupingSyncDestination);
-
             } catch (Exception e) {
                 log.error(String.format("createGroupingSyncDestinationList; skipping sync destination '%s': %s",
                         name, e.getMessage()), e);
@@ -354,25 +300,8 @@ public class GroupingOwnerService {
             sendSyncDestinationErrorEmail(
                     createSyncDestinationError(syncDestinationErrors, syncDestinationErrorMessages));
         }
-        if (groupingPath != null && !groupingPath.isBlank() && !groupName.isBlank()) {
-            syncDestinationList = syncDestinationList.stream()
-                    .filter(destination -> {
-                        String destinationName = destination.getName();
-                        if (destinationName != null && destinationName.contains("uhReleasedGrouping")) {
-                            return true;
-                        }
-                        String destinationDescription =
-                                destination.getDescription() == null ? "" : destination.getDescription();
-                        String destinationTooltip =
-                                destination.getTooltip() == null ? "" : destination.getTooltip();
-                        String destinationText = destinationDescription + " " + destinationTooltip;
-                        return destinationText.contains(groupName)
-                                || (!groupPath.isBlank() && destinationText.contains(groupPath.substring(
-                                Math.max(groupPath.lastIndexOf(':') + 1, 0))));
-                    })
-                    .collect(Collectors.toList());
-        }
-
+        syncDestinationList = filterSyncDestinations(
+                syncDestinationList, groupingPath, groupName, groupPath);
         if (findAttributesResults.getResults() != null) {
             List<String> validNames = syncDestinationList.stream()
                     .map(GroupingSyncDestination::getName)
@@ -387,6 +316,178 @@ public class GroupingOwnerService {
         }
         syncDestinationList.sort(Comparator.comparing(GroupingSyncDestination::getDescription));
         return syncDestinationList;
+    }
+    /**
+     * Get the group path from the groupAttributeResults, or fallback to the groupingPath if not found.
+     */
+    private String getGroupPath(
+            GroupAttributeResults groupAttributeResults,
+            String groupingPath) {
+        return groupAttributeResults.getGroups().stream()
+                .findFirst()
+                .map(Group::getGroupPath)
+                .filter(path -> !path.isBlank())
+                .orElse(groupingPath != null ? groupingPath : "");
+    }
+    /**
+     * Get the group name from the groupAttributeResults, or fallback to the groupPath if not found.
+     */
+    private String getGroupName(
+            GroupAttributeResults groupAttributeResults,
+            String groupPath) {
+        return groupAttributeResults.getGroups().stream()
+                .findFirst()
+                .map(Group::getExtension)
+                .filter(extension -> !extension.isBlank())
+                .orElseGet(() -> {
+                    if (groupPath.isBlank()) {
+                        return "";
+                    }
+                    int lastColon = groupPath.lastIndexOf(':');
+                    return lastColon >= 0
+                            ? groupPath.substring(lastColon + 1)
+                            : groupPath;
+                });
+    }
+    /**
+     * Check if the sync destination references the grouping by name or path.
+     */
+    private boolean referencesGrouping(
+            String groupName,
+            String groupPath,
+            String resolvedDescription,
+            String groupingPath) {
+        if (groupingPath == null || groupingPath.isBlank()) {
+            return true;
+        }
+        return groupName.isBlank()
+                || resolvedDescription.contains(groupName)
+                || (!groupPath.isBlank() && resolvedDescription.contains(
+                groupPath.substring(Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+    }
+    /**
+     * Replace placeholders in the sync destination description and tooltip with the actual grouping name.
+     */
+    private String replaceGroupingPlaceholders(
+            String text,
+            String groupName) {
+        return text
+                .replace("${srhfgs}", groupName)
+                .replace("#${srhfgs}", "#" + groupName)
+                .replace("#uh-iam-group", "#" + groupName)
+                .replace("uh-iam-group", groupName);
+    }
+    /**
+     * Create a GroupingSyncDestination from the attributes result.
+     */
+    private GroupingSyncDestination createGroupingSyncDestination(
+            AttributesResult attributesResult) {
+        String rawDescription = attributesResult.getDescription();
+        if (rawDescription == null || rawDescription.isBlank()) {
+            throw new IllegalArgumentException(
+                    "description field is null or blank — cannot deserialize GroupingSyncDestination");
+        }
+
+        GroupingSyncDestination groupingSyncDestination =
+                JsonUtil.asObject(rawDescription, GroupingSyncDestination.class);
+
+        if (groupingSyncDestination == null) {
+            throw new IllegalStateException(
+                    "JsonUtil.asObject returned null — description may contain the literal string \"null\"");
+        }
+        return groupingSyncDestination;
+    }
+    /**
+     * Process the grouping sync destination by replacing placeholders with the actual grouping name.
+     */
+    private String processGroupingSyncDestination(
+            GroupingSyncDestination groupingSyncDestination,
+            String groupName) {
+        String destinationDescription = groupingSyncDestination.getDescription();
+
+        if (destinationDescription == null) {
+            throw new IllegalStateException(
+                    "deserialized GroupingSyncDestination has a null description field — "
+                            + "JSON is missing the \"description\" property");
+        }
+        String resolvedDescription =
+                replaceGroupingPlaceholders(destinationDescription, groupName);
+        groupingSyncDestination.setDescription(resolvedDescription);
+
+        if (groupingSyncDestination.getTooltip() != null) {
+            groupingSyncDestination.setTooltip(
+                    replaceGroupingPlaceholders(
+                            groupingSyncDestination.getTooltip(), groupName));
+        }
+        return resolvedDescription;
+    }
+    /**
+     * Determine if the grouping sync destination should be skipped.
+     */
+    private boolean shouldSkipGroupingSyncDestination(
+            String name,
+            String groupName,
+            String groupPath,
+            String resolvedDescription,
+            String groupingPath) {
+
+        boolean referencesGrouping = referencesGrouping(
+                groupName, groupPath, resolvedDescription, groupingPath);
+
+        if (!name.contains("uhReleasedGrouping") && !referencesGrouping) {
+            log.info(String.format(
+                    "Skipping sync destination '%s' because it does not reference grouping '%s'",
+                    name, groupName));
+            return true;
+        }
+        return false;
+    }
+    /**
+     * Check if the grouping sync destination is synced.
+     */
+    private boolean isGroupingSyncDestinationSynced(
+            GroupAttributeResults groupAttributeResults,
+            String attributeName) {
+        return groupAttributeResults.getGroupAttributes().stream()
+                .anyMatch(groupAttribute -> groupAttribute.getAttributeName()
+                        .equals(attributeName));
+    }
+    /**
+     * Filter the sync destinations based on the grouping path and group name.
+     */
+    private List<GroupingSyncDestination> filterSyncDestinations(
+            List<GroupingSyncDestination> syncDestinationList,
+            String groupingPath,
+            String groupName,
+            String groupPath) {
+
+        if (groupingPath == null || groupingPath.isBlank() || groupName.isBlank()) {
+            return syncDestinationList;
+        }
+        return syncDestinationList.stream()
+                .filter(destination -> {
+                    String destinationName = destination.getName();
+                    if (destinationName != null
+                            && destinationName.contains("uhReleasedGrouping")) {
+                        return true;
+                    }
+
+                    String destinationDescription =
+                            destination.getDescription() == null
+                                    ? "" : destination.getDescription();
+                    String destinationTooltip =
+                            destination.getTooltip() == null
+                                    ? "" : destination.getTooltip();
+                    String destinationText =
+                            destinationDescription + " " + destinationTooltip;
+
+                    return destinationText.contains(groupName)
+                            || (!groupPath.isBlank()
+                            && destinationText.contains(
+                            groupPath.substring(
+                                    Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+                })
+                .collect(Collectors.toList());
     }
 
     private Exception createSyncDestinationError(List<Exception> syncDestinationErrors,
