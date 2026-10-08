@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -306,11 +307,13 @@ public class GroupingOwnerService {
             List<String> validNames = syncDestinationList.stream()
                     .map(GroupingSyncDestination::getName)
                     .filter(Objects::nonNull)
-                    .toList();
+                    .collect(Collectors.toList());
 
-            List<AttributesResult> filteredResults = new ArrayList<>(findAttributesResults.getResults())
+            List<AttributesResult> filteredResults = findAttributesResults.getResults()
                     .stream()
-                    .filter(r -> r != null && r.getName() != null && validNames.contains(r.getName()))
+                    .filter(result -> result != null
+                            && result.getName() != null
+                            && validNames.contains(result.getName()))
                     .collect(Collectors.toList());
             findAttributesResults.setResults(filteredResults);
         }
@@ -461,7 +464,7 @@ public class GroupingOwnerService {
             String groupName,
             String groupPath) {
 
-        if (groupingPath == null || groupingPath.isBlank() || groupName.isBlank()) {
+        if (groupingPath == null || groupingPath.isBlank() || groupName == null || groupName.isBlank()) {
             return syncDestinationList;
         }
         return syncDestinationList.stream()
@@ -472,20 +475,16 @@ public class GroupingOwnerService {
                         return true;
                     }
 
-                    String destinationDescription =
-                            destination.getDescription() == null
-                                    ? "" : destination.getDescription();
-                    String destinationTooltip =
-                            destination.getTooltip() == null
-                                    ? "" : destination.getTooltip();
-                    String destinationText =
-                            destinationDescription + " " + destinationTooltip;
+                    String destinationText = Stream.of(
+                                    destination.getDescription(),
+                                    destination.getTooltip())
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.joining(" "));
 
                     return destinationText.contains(groupName)
                             || (!groupPath.isBlank()
                             && destinationText.contains(
-                            groupPath.substring(
-                                    Math.max(groupPath.lastIndexOf(':') + 1, 0))));
+                            groupPath.substring(Math.max(groupPath.lastIndexOf(':') + 1, 0))));
                 })
                 .collect(Collectors.toList());
     }
