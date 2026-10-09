@@ -8,9 +8,11 @@ import static edu.hawaii.its.api.service.PathFilter.pathHasBasis;
 import static edu.hawaii.its.api.service.PathFilter.pathHasInclude;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,6 +145,8 @@ public class MembershipService {
 
         List<Group> groupingMemberships = groupPathService.getValidGroupings(new ArrayList<>(pathMap.keySet()));
 
+        Set<String> ownerGroupingPaths = ownerGroupingPaths(groupingMemberships);
+
         List<ManageSubjectResult> results = new ArrayList<>();
 
         for (Group group : groupingMemberships) {
@@ -151,9 +155,24 @@ public class MembershipService {
             ManageSubjectResult manageSubjectResult = subgroups(paths);
             manageSubjectResult.setPath(groupingPath);
             manageSubjectResult.setName(nameGroupingPath(group.getGroupPath()));
+            manageSubjectResult.setOwnerGrouping(ownerGroupingPaths.contains(groupingPath));
             results.add(manageSubjectResult);
         }
         return new ManageSubjectResults(results);
+    }
+
+    /**
+     * Helper - createMembershipList
+     * Which of the groupings are used as an owner-grouping. A grouper failure should not cost the caller the whole
+     * table, so an empty set is returned and the groupings are left unflagged.
+     */
+    private Set<String> ownerGroupingPaths(List<Group> groupings) {
+        try {
+            return groupingsService.ownerGroupingPaths(groupings.stream().map(Group::getGroupPath).toList());
+        } catch (Exception e) {
+            logger.warn("ownerGroupingPaths failed", e);
+            return Collections.emptySet();
+        }
     }
 
     /**

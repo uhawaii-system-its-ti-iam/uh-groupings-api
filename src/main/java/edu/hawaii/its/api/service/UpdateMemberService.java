@@ -21,6 +21,7 @@ import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.GroupType;
+import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
@@ -71,7 +72,7 @@ public class UpdateMemberService {
 
     public GroupingAddResult addAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("addAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));
-        checkIfAdminUser(currentUser);
+        checkIfAdminUser();
         String validUhUuid = subjectService.getValidUhUuid(currentUser, uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhIdentifierNotFoundException(validUhUuid);
@@ -81,7 +82,7 @@ public class UpdateMemberService {
 
     public GroupingRemoveResult removeAdminMember(String currentUser, String uhIdentifier) {
         log.info(String.format("removeAdmin; currentUser: %s; uhIdentifier: %s", currentUser, uhIdentifier));
-        checkIfAdminUser(currentUser);
+        checkIfAdminUser();
         String validUhUuid = subjectService.getValidUhUuid(currentUser, uhIdentifier);
         if (validUhUuid.equals("")) {
             throw new UhIdentifierNotFoundException(validUhUuid);
@@ -157,9 +158,11 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                groupingPath + GroupType.EXCLUDE.value(), validIdentifiers);
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), validationResult.getValidIdentifiers());
+        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+        return result;
     }
 
     @Async
@@ -169,11 +172,13 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return CompletableFuture.supplyAsync(() ->
-                moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                        groupingPath + GroupType.EXCLUDE.value(), validIdentifiers)
-        );
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        return CompletableFuture.supplyAsync(() -> {
+            GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                    groupingPath + GroupType.EXCLUDE.value(), validationResult.getValidIdentifiers());
+            result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+            return result;
+        });
     }
 
     public GroupingMoveMemberResult addIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -190,9 +195,11 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                groupingPath + GroupType.INCLUDE.value(), validIdentifiers);
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                groupingPath + GroupType.INCLUDE.value(), validationResult.getValidIdentifiers());
+        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+        return result;
     }
 
     @Async
@@ -202,11 +209,13 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
-        return CompletableFuture.supplyAsync(() ->
-                moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                        groupingPath + GroupType.INCLUDE.value(), validIdentifiers)
-        );
+        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
+        return CompletableFuture.supplyAsync(() -> {
+            GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                    groupingPath + GroupType.INCLUDE.value(), validationResult.getValidIdentifiers());
+            result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
+            return result;
+        });
     }
 
     public GroupingMoveMemberResult addExcludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -275,7 +284,7 @@ public class UpdateMemberService {
     public GroupingRemoveResults removeFromGroups(String currentUser, String uhIdentifier, List<String> groupPaths) {
         log.info(String.format("removeFromGroups; currentUser: %s; uhIdentifier: %s; groupPaths: %s",
                 currentUser, uhIdentifier, groupPaths));
-        checkIfAdminUser(currentUser);
+        checkIfAdminUser();
         String validIdentifier = subjectService.getValidUhUuid(currentUser, uhIdentifier);
         GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults();
         for (String groupPath : groupPaths) {
@@ -358,7 +367,7 @@ public class UpdateMemberService {
         }
     }
 
-    public void checkIfAdminUser(String currentUser) {
+    public void checkIfAdminUser() {
         // Use JWT for general admin check instead of querying Grouper
         if (!memberService.isCurrentUserAdmin()) {
             throw new AccessDeniedException();

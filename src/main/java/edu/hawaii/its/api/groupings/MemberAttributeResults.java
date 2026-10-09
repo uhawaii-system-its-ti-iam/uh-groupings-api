@@ -30,6 +30,23 @@ public class MemberAttributeResults implements MemberResults<MemberResult> {
         setInvalid(new ArrayList<>());
     }
 
+    /**
+     * Builds a result directly from subjects already resolved by an identifier validation (e.g.
+     * SubjectService.validateUhIdentifiers), instead of a fresh SubjectsResults - so a caller that already
+     * validated the identifiers doesn't have to look them up in Grouper a second time just to get their
+     * attributes. Takes a plain List rather than a constructor overload: List&lt;Subject&gt; and List&lt;String&gt;
+     * (see the invalid-only constructor) erase to the same signature.
+     */
+    public static MemberAttributeResults forValidSubjects(List<Subject> subjects) {
+        MemberAttributeResults results = new MemberAttributeResults();
+        results.setResults(subjects);
+        // Matches SubjectsResults.getResultCode(): SUCCESS if any subject would actually appear in getResults()
+        // below, not merely if Grouper's result code for it was SUCCESS (an orphan's is, but it has no display
+        // attributes and setResults() leaves it out, same as the pre-single-pass caller of this method saw).
+        results.setResultCode(results.getResults().isEmpty() ? "FAILURE" : "SUCCESS");
+        return results;
+    }
+
     public String getResultCode() {
         return resultCode;
     }
@@ -54,7 +71,10 @@ public class MemberAttributeResults implements MemberResults<MemberResult> {
     private void setResults(List<Subject> subjects) {
         this.results = new ArrayList<>();
         for (Subject subject : subjects) {
-            if (subject.getResultCode().equals("SUCCESS")) {
+            // A successful-but-attribute-less ("orphan") subject is a valid Grouper member (validateUhIdentifiers
+            // treats it as such) but has nothing to display here, so it's left out - matching what
+            // SubjectsResults.getSubjects() already did for the pre-single-pass caller of this method.
+            if (subject.getResultCode().equals("SUCCESS") && subject.hasUHAttributes()) {
                 this.results.add(new GroupingGroupMember(subject));
             }
         }

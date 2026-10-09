@@ -59,6 +59,7 @@ import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.hawaii.its.api.type.SortBy;
 import edu.hawaii.its.api.util.JsonUtil;
+import edu.hawaii.its.api.service.MockSecurityContext;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -109,6 +110,7 @@ public class TestGroupingsRestControllerv2_1 {
 
     @BeforeAll
     public void init() {
+        MockSecurityContext.setAdminContext();
         assertTrue(memberService.isAdmin(ADMIN));
 
         testUids = uhIdentifierGenerator.getRandomMembers(4).getUids();
@@ -353,7 +355,7 @@ public class TestGroupingsRestControllerv2_1 {
     public void ownedGroupingTest() throws Exception {
         SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
         for(SortBy sortBy: sortByOptions){
-            String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value() + "&page=1&size=700&isAscending=true";
+            String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value() + "&pageNumber=1&pageSize=700&isAscending=true";
             List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
             MvcResult mvcResult = mockMvc.perform(post(url)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -372,7 +374,7 @@ public class TestGroupingsRestControllerv2_1 {
         SortBy[] sortByOptions = { SortBy.NAME, SortBy.UID, SortBy.UH_UUID };
         for(SortBy sortBy: sortByOptions){
             String url = API_BASE_URL + "groupings/group?sortBy=" + sortBy.value()
-                    + "&page=1&size=700&isAscending=true&searchString=test";
+                    + "&pageNumber=1&pageSize=700&isAscending=true&searchString=test";
             List<String> paths = Arrays.asList(GROUPING_INCLUDE, GROUPING_EXCLUDE, GROUPING_OWNERS);
             MvcResult mvcResult = mockMvc.perform(post(url)
                             

@@ -101,10 +101,10 @@ public class GroupingsRestControllerv2_1Test {
 
     @Value("${groupings.api.releasedgrouping}")
     private String RELEASED_GROUPING;
-	
+
     @Value("${groupings.max.owner.limit}")
     private Integer OWNER_LIMIT;
-	
+
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
 
@@ -160,7 +160,7 @@ public class GroupingsRestControllerv2_1Test {
         Grouping grouping = new Grouping("tmp:tst01name:groupPath01");
 
         Group basisGroup = new Group();
-        Subject subjectBasis0 = new Subject("b0-uid", "b0-name","b0-uuid");
+        Subject subjectBasis0 = new Subject("b0-uid", "b0-name", "b0-uuid");
         basisGroup.addMember(subjectBasis0);
         Subject subjectBasis1 = new Subject("b1-uid", "b1-name", "b1-uuid");
         basisGroup.addMember(subjectBasis1);
@@ -257,9 +257,8 @@ public class GroupingsRestControllerv2_1Test {
         for (int i = 0; i < 3; i++) {
             paths.add(new GroupingPath(GROUPING + i));
         }
-        GroupingPaths groupingPaths = new GroupingPaths();
-        groupingPaths.setGroupingPaths(paths);
-        given(groupingAssignmentService.allGroupingPaths(ADMIN)).willReturn(groupingPaths);
+        GroupingPaths groupingPaths = new GroupingPaths(paths, 1, 25, paths.size());
+        given(groupingAssignmentService.paginatedGroupingPaths(ADMIN, 1, 25, null)).willReturn(groupingPaths);
         mockMvc.perform(get(API_BASE + "/groupings"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("groupingPaths[0].name").value("grouping0"))
@@ -267,9 +266,12 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("groupingPaths[2].name").value("grouping2"))
                 .andExpect(jsonPath("groupingPaths[0].path").value("path:to:grouping0"))
                 .andExpect(jsonPath("groupingPaths[1].path").value("path:to:grouping1"))
-                .andExpect(jsonPath("groupingPaths[2].path").value("path:to:grouping2"));
+                .andExpect(jsonPath("groupingPaths[2].path").value("path:to:grouping2"))
+                .andExpect(jsonPath("page").value(1))
+                .andExpect(jsonPath("pageSize").value(25))
+                .andExpect(jsonPath("totalCount").value(3));
         verify(groupingAssignmentService, times(1))
-                .allGroupingPaths(ADMIN);
+                .paginatedGroupingPaths(ADMIN, 1, 25, null);
     }
 
     @Test
@@ -435,7 +437,7 @@ public class GroupingsRestControllerv2_1Test {
             given(groupingOwnerService.paginatedGrouping(TEST_USER, paths, 1, 700, sortBy.sortString(), true))
                 .willReturn(groupingGroupsMembers);
             MvcResult result = mockMvc.perform(
-                post(API_BASE + "/groupings/group?page=1&size=700&sortBy=" + sortBy.value() + "&isAscending=true")
+                post(API_BASE + "/groupings/group?pageNumber=1&pageSize=700&sortBy=" + sortBy.value() + "&isAscending=true")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(JsonUtil.asJson(paths)))
                     .andExpect(status().isOk())
@@ -460,7 +462,7 @@ public class GroupingsRestControllerv2_1Test {
             given(groupingOwnerService.getGroupingMembers(TEST_USER, path, 1, 700,
                     sortBy.sortString(), true, "test")).willReturn(groupingGroupMembers);
             MvcResult result = mockMvc.perform(
-                            get(API_BASE + "/groupings/" + path + "?page=1&size=700&sortBy=" + sortBy.value()
+                            get(API_BASE + "/groupings/" + path + "?pageNumber=1&pageSize=700&sortBy=" + sortBy.value()
                                     + "&isAscending=true&searchString=test"))
                     .andExpect(status().isOk())
                     .andExpect(content().json(JsonUtil.asJson(groupingGroupMembers)))
@@ -1180,7 +1182,7 @@ public class GroupingsRestControllerv2_1Test {
         MvcResult mvcResult = mockMvc.perform(get(API_BASE + "/jobs/" + jobId))
                 .andExpect(status().isOk()).andReturn();
         assertNotNull(mvcResult);
-        verify(asyncJobsManager, times(1)).getJobResult(TEST_USER, jobId);
+        verify(asyncJobsManager, times(1)).getJobResult(jobId);
     }
 
     @Test

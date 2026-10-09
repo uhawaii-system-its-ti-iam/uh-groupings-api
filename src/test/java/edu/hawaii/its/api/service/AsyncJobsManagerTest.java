@@ -5,25 +5,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
+import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.type.AsyncJobResult;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
 public class AsyncJobsManagerTest {
-
-    @Value("${groupings.api.current_user}")
-    private String CURRENT_USER;
 
     @MockitoBean
     private MemberService memberService;
@@ -39,34 +37,63 @@ public class AsyncJobsManagerTest {
 
     @Test
     public void getJobResultNotFoundTest() {
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, 0);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(0);
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
 
         doReturn(false).when(memberService).isCurrentUserAdmin();
-        AsyncJobResult result = asyncJobsManager.getJobResult(CURRENT_USER, 0);
+        AsyncJobResult result = asyncJobsManager.getJobResult(0);
         assertEquals("NOT_FOUND", result.getStatus());
     }
 
     @Test
     public void getJobResultInProgressTest() {
         Integer jobId = asyncJobsManager.putJob(new CompletableFuture<>());
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, jobId);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals("IN_PROGRESS", asyncJobResult.getStatus());
     }
 
     @Test
     public void getJobResultCompletedTest() {
         Integer jobId = asyncJobsManager.putJob(CompletableFuture.completedFuture("completedJob"));
-        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(CURRENT_USER, jobId);
+        AsyncJobResult asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals("COMPLETED", asyncJobResult.getStatus());
         assertEquals("completedJob", asyncJobResult.getResult());
+    }
+
+    @Test
+    public void getJobResultRethrowsTheRealFailureOfAFailedJob() {
+        // An @Async method that throws completes its future with a CompletionException wrapping the failure.
+        Integer grouperJobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new GrouperException("Grouper unavailable"))));
+        assertThrows(GrouperException.class, () -> asyncJobsManager.getJobResult(grouperJobId));
+
+        Integer deniedJobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new AccessDeniedException())));
+        assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(deniedJobId));
+    }
+
+    @Test
+    public void getJobResultRethrowsAFailedJobOnlyOnce() {
+        Integer jobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new GrouperException("Grouper unavailable"))));
+        assertThrows(GrouperException.class, () -> asyncJobsManager.getJobResult(jobId));
+        assertEquals("NOT_FOUND", asyncJobsManager.getJobResult(jobId).getStatus());
+    }
+
+    @Test
+    public void getJobResultKeepsTheWrapperWhenTheFailureIsNotARuntimeException() {
+        Integer jobId = asyncJobsManager.putJob(
+                CompletableFuture.failedFuture(new CompletionException(new Exception("checked"))));
+        CompletionException e =
+                assertThrows(CompletionException.class, () -> asyncJobsManager.getJobResult(jobId));
+        assertEquals("checked", e.getCause().getMessage());
     }
 
     @Test
     public void getJobResultDeniedTest() {
         doReturn(false).when(memberService).isCurrentUserAdmin();
         doReturn(false).when(memberService).isCurrentUserOwner();
-        assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(CURRENT_USER, 0));
+        assertThrows(AccessDeniedException.class, () -> asyncJobsManager.getJobResult(0));
     }
 
 }

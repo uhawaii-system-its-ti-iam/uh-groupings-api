@@ -18,6 +18,7 @@ import edu.internet2.middleware.grouperClientExt.com.fasterxml.jackson.annotatio
  */
 public class SubjectsResults extends Results {
     private WsGetSubjectsResults wsGetSubjectsResults;
+    private List<Subject> subjects;
 
     public SubjectsResults(WsGetSubjectsResults wsGetSubjectsResults) {
         if (wsGetSubjectsResults == null) {
@@ -40,6 +41,13 @@ public class SubjectsResults extends Results {
     }
 
     public List<Subject> getSubjects() {
+        if (subjects == null) {
+            subjects = buildSubjects();
+        }
+        return new ArrayList<>(subjects);
+    }
+
+    private List<Subject> buildSubjects() {
         List<Subject> subjects = new ArrayList<>();
         WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
         if (isEmpty(wsSubjects)) {
@@ -55,6 +63,26 @@ public class SubjectsResults extends Results {
             if (subject.getResultCode().equals("SUCCESS") && !subject.hasUHAttributes()) {
                 continue;
             }
+            subjects.add(subject);
+        }
+        return subjects;
+    }
+
+    /**
+     * Returns every Subject Grouper answered with, without the "successful but no UH attributes" filtering that
+     * getSubjects() applies. Needed when a caller must know which identifiers resolved (e.g. bulk identifier
+     * validation), since that filtering would otherwise drop resolved subjects that have no LDAP data.
+     * <p>
+     * Grouper does not answer with one entry per lookup: lookups that resolve to nothing are collapsed into a
+     * single SUBJECT_NOT_FOUND entry, so results can't be correlated with the lookups by position or count.
+     */
+    public List<Subject> getUnfilteredSubjects() {
+        List<Subject> subjects = new ArrayList<>();
+        WsSubject[] wsSubjects = wsGetSubjectsResults.getWsSubjects();
+        if (isEmpty(wsSubjects)) {
+            return subjects;
+        }
+        for (WsSubject wsSubject : wsSubjects) {
             subjects.add(new Subject(wsSubject));
         }
         return subjects;

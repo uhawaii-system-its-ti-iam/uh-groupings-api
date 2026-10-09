@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
 import com.fasterxml.jackson.annotation.JsonSetter;
+
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.wrapper.GroupAttributeResults;
@@ -12,7 +13,9 @@ public class GroupingPaths {
 
     private String resultCode;
     private List<GroupingPath> groupingPaths;
-
+    private Integer page;
+    private Integer pageSize;
+    private Integer totalCount;
 
     public GroupingPaths() {
         setGroupingPaths(new ArrayList<>());
@@ -29,6 +32,13 @@ public class GroupingPaths {
         setResultCode("SUCCESS");
     }
 
+    public GroupingPaths(List<GroupingPath> groupingPaths, int page, int pageSize, int totalCount) {
+        this(groupingPaths);
+        this.page = page;
+        this.pageSize = pageSize;
+        this.totalCount = totalCount;
+    }
+
     @JsonSetter
     public void setGroupingPaths(List<GroupingPath> groupingPaths) {
         this.groupingPaths = groupingPaths;
@@ -43,6 +53,18 @@ public class GroupingPaths {
 
     public List<GroupingPath> getGroupingPaths() {
         return this.groupingPaths;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public Integer getTotalCount() {
+        return totalCount;
     }
 
     public void addGroupingPath(GroupingPath groupingPath) {

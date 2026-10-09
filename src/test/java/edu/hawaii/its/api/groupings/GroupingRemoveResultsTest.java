@@ -16,7 +16,9 @@ import edu.hawaii.its.api.util.JsonUtil;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 
+import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsDeleteMemberResults;
+import edu.internet2.middleware.grouperClient.ws.beans.WsResultMeta;
 
 public class GroupingRemoveResultsTest {
     private static Properties properties;
@@ -48,10 +50,27 @@ public class GroupingRemoveResultsTest {
         GroupingRemoveResults groupingRemoveResults = new GroupingRemoveResults(removeMembersResults);
         assertEquals("SUCCESS", groupingRemoveResults.getResultCode());
 
+        // Despite its name, this fixture's individual results are all the idempotent "SUCCESS_WASNT_IMMEDIATE"
+        // code (no literal "FAILURE"), so the aggregate is correctly a success, not a failure.
         json = propertyValue("ws.delete.member.results.failure");
         wsDeleteMemberResults = JsonUtil.asObject(json, WsDeleteMemberResults.class);
         removeMembersResults = new RemoveMembersResults(wsDeleteMemberResults);
         groupingRemoveResults = new GroupingRemoveResults(removeMembersResults);
+        assertEquals("SUCCESS", groupingRemoveResults.getResultCode());
+    }
+
+    @Test
+    public void resultCodeIsFailureWhenNoMemberSucceeded() {
+        WsDeleteMemberResult wsDeleteMemberResult = new WsDeleteMemberResult();
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode("FAILURE");
+        wsDeleteMemberResult.setResultMetadata(resultMetadata);
+
+        WsDeleteMemberResults wsDeleteMemberResults = new WsDeleteMemberResults();
+        wsDeleteMemberResults.setResults(new WsDeleteMemberResult[] { wsDeleteMemberResult });
+
+        GroupingRemoveResults groupingRemoveResults =
+                new GroupingRemoveResults(new RemoveMembersResults(wsDeleteMemberResults));
         assertEquals("FAILURE", groupingRemoveResults.getResultCode());
     }
 

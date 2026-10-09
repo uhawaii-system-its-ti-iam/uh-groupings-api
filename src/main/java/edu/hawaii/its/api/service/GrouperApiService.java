@@ -252,6 +252,16 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
+     * Get all groups that each of the groupPaths is listed in. The groupPaths are looked up as group subjects, so a
+     * single call to grouper answers this for every path passed.
+     */
+    public GetGroupsResults getGroupsOfGroups(List<String> groupPaths) {
+        return exec.execute(new GetGroupsCommand()
+                .addGroupPaths(groupPaths)
+                .query(""));
+    }
+
+    /**
      * Get all members listed in a group.
      */
     public GetMembersResult getMembersResult(String currentUser, String groupPath) {
@@ -309,8 +319,14 @@ public class GrouperApiService implements GrouperService {
 
     /**
      * Add multiple UH identifiers to a group listing.
+     * Grouper's GcAddMember client rejects a zero-subject request outright ("Need at least one subject to
+     * add to group") since it's ambiguous whether that means "add nothing" or a caller mistake, so an empty
+     * list is short-circuited here instead of being sent to Grouper.
      */
     public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+        if (uhIdentifiers.isEmpty()) {
+            return new AddMembersResults();
+        }
         return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
@@ -321,6 +337,9 @@ public class GrouperApiService implements GrouperService {
      * Add multiple owner-groupings to a group owner listing.
      */
     public AddMembersResults addOwnerGroupings(String currentUser, String groupPath, List<String> ownerGroupings) {
+        if (ownerGroupings.isEmpty()) {
+            return new AddMembersResults();
+        }
         return exec.execute(new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
@@ -339,8 +358,13 @@ public class GrouperApiService implements GrouperService {
 
     /**
      * Remove multiple UH identifiers from a group listing.
+     * Mirrors the addMembers guard above: GcDeleteMember has no "replace all" escape hatch at all, so it
+     * always rejects a zero-subject request.
      */
     public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+        if (uhIdentifiers.isEmpty()) {
+            return new RemoveMembersResults();
+        }
         return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
@@ -352,6 +376,9 @@ public class GrouperApiService implements GrouperService {
      */
     public RemoveMembersResults removeOwnerGroupings(String currentUser, String groupPath,
             List<String> ownerGroupings) {
+        if (ownerGroupings.isEmpty()) {
+            return new RemoveMembersResults();
+        }
         return exec.execute(new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)

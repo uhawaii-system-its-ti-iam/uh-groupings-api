@@ -1,5 +1,7 @@
 package edu.hawaii.its.api.groupings;
 
+import java.util.List;
+
 import edu.hawaii.its.api.wrapper.AddMembersResults;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 
@@ -15,6 +17,8 @@ public class GroupingMoveMembersResult implements GroupingResult {
 
     private String resultCode;
 
+    private List<String> invalidUhIdentifiers = List.of();
+
     public GroupingMoveMembersResult(AddMembersResults addMembersResults, RemoveMembersResults removeMembersResults) {
         addResults = new GroupingAddResults(addMembersResults);
         removeResults = new GroupingRemoveResults(removeMembersResults);
@@ -26,7 +30,7 @@ public class GroupingMoveMembersResult implements GroupingResult {
         addResults = new GroupingAddResults();
         removeResults = new GroupingRemoveResults();
         setResultCode("");
-        setResultCode("");
+        setGroupPath("");
     }
 
     public GroupingAddResults getAddResults() {
@@ -51,5 +55,17 @@ public class GroupingMoveMembersResult implements GroupingResult {
 
     public void setGroupPath(String groupPath) {
         this.groupPath = groupPath;
+    }
+
+    /**
+     * The submitted identifiers that could not be resolved to a Grouper subject (malformed, or unknown to
+     * Grouper), in full - not truncated.
+     */
+    public List<String> getInvalidUhIdentifiers() {
+        return invalidUhIdentifiers;
+    }
+
+    public void setInvalidUhIdentifiers(List<String> invalidUhIdentifiers) {
+        this.invalidUhIdentifiers = invalidUhIdentifiers;
     }
 }

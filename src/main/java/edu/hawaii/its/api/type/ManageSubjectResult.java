@@ -7,6 +7,7 @@ public class ManageSubjectResult {
     private boolean inExclude = false;
     private boolean inOwner = false;
     private boolean inBasisAndInclude = false;
+    private boolean ownerGrouping = false;
 
     public String getPath() {
         return path;
@@ -30,6 +31,14 @@ public class ManageSubjectResult {
 
     public boolean isInExclude() {
         return inExclude;
+    }
+
+    /**
+     * Whether this grouping is used as the owner-grouping of some grouping, meaning its members are owners of that
+     * grouping.
+     */
+    public boolean isOwnerGrouping() {
+        return ownerGrouping;
     }
 
     public void setPath(String path) {
@@ -56,6 +65,10 @@ public class ManageSubjectResult {
         this.inBasisAndInclude = inBasisAndInclude;
     }
 
+    public void setOwnerGrouping(boolean ownerGrouping) {
+        this.ownerGrouping = ownerGrouping;
+    }
+
     @Override
     public String toString() {
         return "Membership{" +
@@ -65,6 +78,7 @@ public class ManageSubjectResult {
                 ", inExclude=" + inExclude +
                 ", inOwner=" + inOwner +
                 ", inBasisAndInclude=" + inBasisAndInclude +
+                ", ownerGrouping=" + ownerGrouping +
                 '}';
     }
 }

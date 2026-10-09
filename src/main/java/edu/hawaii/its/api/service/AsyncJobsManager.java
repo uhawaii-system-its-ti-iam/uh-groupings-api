@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.service;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -31,8 +32,8 @@ public class AsyncJobsManager {
         return jobId;
     }
 
-    public AsyncJobResult getJobResult(String currentUser, Integer jobId) {
-        logger.debug(String.format("getJobResult; currentUser: %s; jobId: %s;", currentUser, jobId));
+    public AsyncJobResult getJobResult(Integer jobId) {
+        logger.debug(String.format("getJobResult; jobId: %s;", jobId));
 
         // Use JWT for general role checks instead of querying Grouper
         if (!memberService.isCurrentUserAdmin() && !memberService.isCurrentUserOwner()) {
@@ -48,6 +49,16 @@ public class AsyncJobsManager {
         }
 
         jobMap.remove(jobId);
-        return new AsyncJobResult(jobId, "COMPLETED", job.join());
+        try {
+            return new AsyncJobResult(jobId, "COMPLETED", job.join());
+        } catch (CompletionException e) {
+            // join() wraps whatever the job threw. Rethrow the real failure so it maps to its own status
+            // (e.g. 503 when Grouper is unavailable, 403 when access is denied) instead of a blanket 500.
+            logger.warn(String.format("getJobResult; jobId: %s; job failed: %s", jobId, e.getCause()));
+            if (e.getCause() instanceof RuntimeException cause) {
+                throw cause;
+            }
+            throw e;
+        }
     }
 }

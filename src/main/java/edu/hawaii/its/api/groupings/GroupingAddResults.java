@@ -34,7 +34,7 @@ public class GroupingAddResults implements GroupingResult {
 
     public void setResultCode() {
         for (AddMemberResult addMemberResult : addMembersResults.getResults()) {
-            if (addMemberResult.getResultCode().equals("SUCCESS")) {
+            if (addMemberResult.getResultCode().startsWith("SUCCESS")) {
                 this.resultCode = "SUCCESS";
                 return;
             }

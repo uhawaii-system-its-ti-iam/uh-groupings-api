@@ -50,7 +50,7 @@ public class GroupingRemoveResults implements GroupingResult {
 
     public void setResultCode() {
         for (RemoveMemberResult removeMemberResult : removeMembersResults.getResults()) {
-            if (removeMemberResult.getResultCode().equals("SUCCESS")) {
+            if (removeMemberResult.getResultCode().startsWith("SUCCESS")) {
                 this.resultCode = "SUCCESS";
                 return;
             }

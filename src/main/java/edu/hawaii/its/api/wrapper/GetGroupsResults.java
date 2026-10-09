@@ -1,7 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResult;
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetGroupsResults;
@@ -47,6 +49,33 @@ public class GetGroupsResults extends Results {
             }
         }
         return groups;
+    }
+
+    /**
+     * The groups that each subject of the query is listed in, keyed on subject name. When the subjects are groups,
+     * the subject name is the group path.
+     */
+    public Map<String, List<Group>> getGroupsBySubjectName() {
+        WsGetGroupsResult[] results = this.wsGetGroupsResults.getResults();
+        Map<String, List<Group>> groupsBySubjectName = new HashMap<>();
+        if (isEmpty(results)) {
+            return groupsBySubjectName;
+        }
+        for (WsGetGroupsResult result : results) {
+            WsSubject wsSubject = result.getWsSubject();
+            if (wsSubject == null || wsSubject.getName() == null) {
+                continue;
+            }
+            List<Group> groups = new ArrayList<>();
+            WsGroup[] wsGroups = result.getWsGroups();
+            if (!isEmpty(wsGroups)) {
+                for (WsGroup wsGroup : wsGroups) {
+                    groups.add(new Group(wsGroup));
+                }
+            }
+            groupsBySubjectName.put(wsSubject.getName(), groups);
+        }
+        return groupsBySubjectName;
     }
 
     public Subject getSubject() {

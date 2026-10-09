@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -105,6 +104,7 @@ public class TestGroupingAssignmentService {
         grouperService.removeMember(ADMIN, GROUPING_INCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_EXCLUDE, testUid);
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        MockSecurityContext.clearContext();
 
     }
 
@@ -112,20 +112,19 @@ public class TestGroupingAssignmentService {
     public void groupingAdminsTest() {
         // Should throw an exception if current user is not an admin.
         try {
-            groupingAssignmentService.groupingAdmins(testUid);
+            groupingAssignmentService.groupingAdmins(ADMIN);
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not throw an exception if current user is an admin.
-        updateMemberService.addAdminMember(ADMIN, testUid);
+        MockSecurityContext.setAdminContext();
         try {
-            groupingAssignmentService.groupingAdmins(testUid);
+            groupingAssignmentService.groupingAdmins(ADMIN);
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Fields in AdminListsHolder should not be null.
         GroupingGroupMembers groupingAdmins = groupingAssignmentService.groupingAdmins(ADMIN);
@@ -136,23 +135,22 @@ public class TestGroupingAssignmentService {
     public void allGroupingsTest() {
         // Should throw an exception if current user is not an admin.
         try {
-            groupingAssignmentService.allGroupingPaths(testUid);
+            groupingAssignmentService.allGroupingPaths();
             fail("Should throw an exception if current user is not an admin.");
         } catch (AccessDeniedException e) {
             assertEquals("Insufficient Privileges", e.getMessage());
         }
 
         // Should not throw an exception if current user is an admin.
-        updateMemberService.addAdminMember(ADMIN, testUid);
+        MockSecurityContext.setAdminContext();
         try {
-            groupingAssignmentService.allGroupingPaths(testUid);
+            groupingAssignmentService.allGroupingPaths();
         } catch (AccessDeniedException e) {
             fail("Should not throw an exception if current user is an admin.");
         }
-        updateMemberService.removeAdminMember(ADMIN, testUid);
 
         // Fields in groupingAll should not be null.
-        GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths(ADMIN);
+        GroupingPaths groupingAll = groupingAssignmentService.allGroupingPaths();
         assertNotNull(groupingAll.getGroupingPaths());
     }
 
@@ -169,7 +167,8 @@ public class TestGroupingAssignmentService {
         // Test both getOptInGroups and getOptOutGroups()
         GroupingPaths optInGroupingsPaths =
                 groupingAssignmentService.optInGroupingPaths(ADMIN, testUid);
-        List<String> optInPaths = optInGroupingsPaths.getGroupingPaths().stream().map(GroupingPath::getPath).collect(Collectors.toList());
+        List<String> optInPaths =
+                optInGroupingsPaths.getGroupingPaths().stream().map(GroupingPath::getPath).collect(Collectors.toList());
         List<String> optOutPaths = groupingAssignmentService.optOutGroupingsPaths(ADMIN, testUid);
         Set<String> intersection =
                 optInPaths.stream().distinct().filter(optOutPaths::contains).collect(Collectors.toSet());
@@ -226,7 +225,7 @@ public class TestGroupingAssignmentService {
         GroupingOwnerMembers ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
         assertNotNull(ownersWithGroup);
         assertTrue(ownersWithGroup.getOwners().getMembers().stream()
-                .anyMatch(member ->OWNER_GROUPING.equals(member.getName())));
+                .anyMatch(member -> OWNER_GROUPING.equals(member.getName())));
 
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         ownersWithGroup = groupingAssignmentService.groupingImmediateOwners(ADMIN, GROUPING);
@@ -270,6 +269,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void numberOfImmediateOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int initialOwners = groupingAssignmentService.numberOfImmediateOwners(ADMIN, GROUPING, ADMIN);
         //Person
         updateMemberService.addOwnership(ADMIN, GROUPING, testUid);
@@ -287,6 +287,7 @@ public class TestGroupingAssignmentService {
     @Test
     public void numberOfAllOwners() {
         grouperService.removeMember(ADMIN, GROUPING_OWNERS, testUid);
+        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         int initialOwners = groupingAssignmentService.numberOfAllOwners(ADMIN, GROUPING);
         int basisMembers = groupingOwnerService.numberOfGroupingMembers(ADMIN, OWNER_GROUPING + ":basis");
         int includeMembers = groupingOwnerService.numberOfGroupingMembers(ADMIN, OWNER_GROUPING + ":include");

@@ -41,13 +41,26 @@ public class UhIdentifierGenerator {
 
     public GroupingMembers getRandomMembers(int amount) {
         List<GroupingMember> members = getGroupingMembers();
+
+        List<GroupingMember> validMembers = members.stream()
+                .filter(member -> !member.getUid().isEmpty())
+                .toList();
+
+        if (amount > validMembers.size()) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Requested %d random members, but only %d valid identifiers are available.",
+                            amount,
+                            validMembers.size()));
+        }
+
         HashSet<GroupingMember> randomMembers = new HashSet<>();
 
-        while (randomMembers.size() != amount) {
-            GroupingMember randomMember = members.get(getRandomNumberBetween(0, members.size() - 1));
-            if (!randomMember.getUid().isEmpty()) {
-                randomMembers.add(randomMember);
-            }
+        while (randomMembers.size() < amount) {
+            GroupingMember randomMember =
+                    validMembers.get(getRandomNumberBetween(0, validMembers.size() - 1));
+
+            randomMembers.add(randomMember);
         }
 
         return new GroupingMembers(new ArrayList<>(randomMembers));

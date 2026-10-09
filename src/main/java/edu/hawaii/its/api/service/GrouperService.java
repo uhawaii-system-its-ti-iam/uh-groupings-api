@@ -63,6 +63,8 @@ public interface GrouperService {
 
     GetGroupsResults getGroupsResults(String uhIdentifier, String query);
 
+    GetGroupsResults getGroupsOfGroups(List<String> groupPaths);
+
     GetMembersResult getMembersResult(String currentUser, String groupPath);
 
     GetMembersResults getMembersResults(List<String> groupPaths);
