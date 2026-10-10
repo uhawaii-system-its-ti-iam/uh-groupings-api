@@ -83,4 +83,18 @@ public class JwtRoleConverterTest {
                 new SimpleGrantedAuthority("ROLE_OWNER"),
                 new SimpleGrantedAuthority("ROLE_ADMIN"))));
     }
+
+    @Test
+    public void loggableReplacesCharactersThatCouldForgeALogLine() {
+        String forged = "SUPERUSER\r\n2026-01-01 INFO Admin granted\t" + (char) 0x1b + "[31m" + (char) 0x2028 + (char) 0x202e;
+
+        assertThat(JwtRoleConverter.loggable(forged),
+                equalTo("SUPERUSER__2026-01-01 INFO Admin granted__[31m__"));
+    }
+
+    @Test
+    public void loggableTruncatesLongClaims() {
+        assertThat(JwtRoleConverter.loggable("A".repeat(500)).length(), equalTo(80));
+        assertThat(JwtRoleConverter.loggable("SUPERUSER"), equalTo("SUPERUSER"));
+    }
 }

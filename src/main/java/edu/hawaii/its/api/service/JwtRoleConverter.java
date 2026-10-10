@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import edu.hawaii.its.api.type.Role;
+import edu.hawaii.its.api.util.Strings;
 
 /**
  * Maps the "roles" claim of a JWT onto Spring Security authorities.
@@ -20,6 +21,11 @@ import edu.hawaii.its.api.type.Role;
 public class JwtRoleConverter {
 
     private static final Log log = LogFactory.getLog(JwtRoleConverter.class);
+
+    private static final int MAX_LOGGED_CLAIM_LENGTH = 80;
+
+    /** Control (Cc), format (Cf, e.g. bidi overrides) and line/paragraph separator characters. */
+    private static final String UNLOGGABLE_CHARACTERS = "[\\p{Cc}\\p{Cf}\\p{Zl}\\p{Zp}]";
 
     /**
      * Convert a roles claim into authorities, discarding entries that name no known Role.
@@ -31,13 +37,23 @@ public class JwtRoleConverter {
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (String claim : roleClaims) {
+            if (Strings.isEmpty(claim)) {
+                continue;
+            }
             Optional<String> authorityName = Role.authorityNameFromClaim(claim);
             if (authorityName.isEmpty()) {
-                log.warn("Discarding unrecognized role in JWT roles claim: " + claim);
+                log.warn("Discarding unrecognized role in JWT roles claim: " + loggable(claim));
                 continue;
             }
             authorities.add(new SimpleGrantedAuthority(authorityName.get()));
         }
         return List.copyOf(authorities);
+    }
+
+    /**
+     * Truncate a claim and replace control and line-separator characters so it cannot forge log lines.
+     */
+    static String loggable(String claim) {
+        return Strings.truncate(claim, MAX_LOGGED_CLAIM_LENGTH).replaceAll(UNLOGGABLE_CHARACTERS, "_");
     }
 }
