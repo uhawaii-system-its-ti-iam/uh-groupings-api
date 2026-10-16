@@ -245,7 +245,8 @@ public class BatchExecutor {
                     throw e;
                 }
                 long delay = retryDelaysMillis.get(attempt - 1);
-                logger.warn(String.format("%s attempt %d failed (%s); retrying in %d ms;", text, attempt, e, delay));
+                logger.warn(String.format("%s attempt %d failed (%s); retrying in %d ms;", text, attempt,
+                        e.getCause() == null ? e : e.getCause(), delay));
                 pause(delay, e);
             }
         }

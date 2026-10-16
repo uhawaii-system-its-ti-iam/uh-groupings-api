@@ -290,6 +290,9 @@ public class BatchExecutorTest {
     @Test
     public void isRetryableOnlyForFailuresThatCanPass() {
         assertTrue(BatchExecutor.isRetryable(new GrouperException("failed", new IOException())));
+        // How the Grouper client throws a socket timeout.
+        assertTrue(BatchExecutor.isRetryable(new GrouperException("failed",
+                new RuntimeException("Problem in url", new SocketTimeoutException("Read timed out")))));
         assertTrue(BatchExecutor.isRetryable(removeFailure("EXCEPTION", "SUCCESS_WASNT_IMMEDIATE")));
         assertFalse(BatchExecutor.isRetryable(removeFailure("SUCCESS")));
         assertFalse(BatchExecutor.isRetryable(new GcWebServiceError(null, "Bad response from web service")));
