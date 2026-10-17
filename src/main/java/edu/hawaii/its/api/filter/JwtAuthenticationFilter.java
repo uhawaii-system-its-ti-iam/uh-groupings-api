@@ -40,7 +40,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // No usable token: leave the request unauthenticated so SecurityConfig's entry point answers 401.
+        // An empty "Bearer " token must stop here too, since the JWT parser rejects it with an
+        // IllegalArgumentException rather than a JwtException.
+        if (authHeader == null || !authHeader.startsWith("Bearer ") || authHeader.substring(7).isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -49,8 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // JwtException (and its subtypes, e.g. SignatureException) are thrown here, in the security
         // filter chain, so they never reach DispatcherServlet's controller invocation and would bypass
-        // ErrorControllerAdvice entirely. Routing them through HandlerExceptionResolver lets the same
-        // @ExceptionHandler methods (and their email alerts) handle them here too.
+        // ErrorControllerAdvice entirely. Routing them through HandlerExceptionResolver lets
+        // handleJwtException (and its email alert) handle them here too.
         try {
             final String username = jwtService.extractUsername(jwt);
 

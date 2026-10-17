@@ -122,6 +122,12 @@ Queries Grouper to determine roles. Used during login to populate JWT tokens.
 **Protected endpoints (JWT required):**
 - All other `/api/groupings/v2.1/**` endpoints
 
+**Status codes:** 401 means the caller has no usable token: it's missing or empty (empty body, from the
+`SecurityConfig` entry point) or it's expired, malformed or wrongly signed (`JwtException` → `ApiError`). 403 is
+reserved for an authenticated user who lacks permission (`AccessDeniedException`); the UI treats it as lost owner
+access. `JwtService` builds its signing key at startup, so a bad `jwt.secret.key` stops the app from starting
+instead of failing every request.
+
 ## Critical Patterns
 
 ### Command/Wrapper Pattern
@@ -502,10 +508,14 @@ GET    /api/groupings/v2.1/jobs/{jobId}
 ## Error Handling
 
 All exceptions are caught by `ErrorControllerAdvice` and mapped to HTTP responses with `ApiError` objects.
+`JwtException`s are thrown in the security filter chain, before any controller runs, so `JwtAuthenticationFilter`
+routes them to `ErrorControllerAdvice` through `HandlerExceptionResolver`.
 
 | Exception                       | HTTP Status               | Message                                   |
 |---------------------------------|---------------------------|-------------------------------------------|
 | `AccessDeniedException`         | 403 FORBIDDEN             | Access Denied Exception                   |
+| `SignatureException` (JWT)      | 401 UNAUTHORIZED          | SECURITY ALERT: JWT Signature Mismatch    |
+| Other `JwtException` subtypes   | 401 UNAUTHORIZED          | JWT Exception                             |
 | `InvalidGroupPathException`     | 400 BAD_REQUEST           | Invalid Group Path Exception              |
 | `InvalidUhIdentifierException`  | 400 BAD_REQUEST           | Invalid Uh Member Exception               |
 | `GroupPathNotFoundException`    | 404 NOT_FOUND             | Group Path found failed                   |
@@ -521,13 +531,15 @@ All exceptions are caught by `ErrorControllerAdvice` and mapped to HTTP response
 **Error response format:**
 ```json
 {
-  "status": 403,
-  "message": "Access Denied Exception",
+  "status": "403 FORBIDDEN",
   "resultCode": "FAILURE",
-  "path": "/api/groupings/v2.1/groupings/test/include-members",
-  "stackTrace": "..."
+  "timestamp": "...",
+  "message": "Access Denied Exception",
+  "path": "/api/groupings/v2.1/groupings/test/include-members"
 }
 ```
+Stack traces are never returned to clients: `ApiError.getStackTrace()` is `@JsonIgnore`. They go to the log and the
+error email (`EmailService.sendWithStack`) instead.
 
 ## Request/Response Models
 

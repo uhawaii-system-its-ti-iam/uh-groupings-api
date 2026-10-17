@@ -269,36 +269,23 @@ public class ErrorControllerAdvice {
         return buildResponseEntity(apiError);
     }
 
-    @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<ApiError> handleJwtSignatureException(SignatureException se) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
-
-        logger.error("SECURITY ALERT: JWT Signature Mismatch for path: " + path, se);
-        emailService.sendWithStack(se, "SECURITY ALERT: JWT Signature Mismatch", path);
-        ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.FORBIDDEN)
-                .message("SECURITY ALERT: JWT Signature Mismatch")
-                .stackTrace(ExceptionUtils.getStackTrace(se))
-                .resultCode(RESULT_CODE_FAILURE)
-                .path(path);
-
-        ApiError apiError = errorBuilder.build();
-
-        return buildResponseEntity(apiError);
-    }
-
+    // Every JwtException means the caller's token can't be trusted (expired, malformed, wrong signature,
+    // unsupported algorithm), so all of them are 401. 403 stays reserved for an authenticated user who
+    // lacks permission, which the UI treats as lost owner access.
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ApiError> handleJwtException(JwtException je) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
 
-        logger.error("JWT Exception for path: " + path, je);
-        emailService.sendWithStack(je, "JWT Exception", path);
+        String message = je instanceof SignatureException
+                ? "SECURITY ALERT: JWT Signature Mismatch"
+                : "JWT Exception";
+
+        logger.error(message + " for path: " + path, je);
+        emailService.sendWithStack(je, message, path);
         ApiError.Builder errorBuilder = new ApiError.Builder()
-                .status(HttpStatus.FORBIDDEN)
-                .message("JWT Exception")
-                .stackTrace(ExceptionUtils.getStackTrace(je))
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(message)
                 .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 

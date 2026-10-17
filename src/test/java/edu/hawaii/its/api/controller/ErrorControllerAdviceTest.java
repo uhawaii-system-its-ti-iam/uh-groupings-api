@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.anyString;
@@ -19,12 +20,14 @@ import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import edu.hawaii.its.api.service.EmailService;
 import edu.hawaii.its.api.type.ApiError;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -139,10 +142,11 @@ public class ErrorControllerAdviceTest {
         ErrorControllerAdvice advice = new ErrorControllerAdvice(emailService);
         SignatureException ex = new SignatureException("bad signature");
 
-        org.springframework.http.ResponseEntity<ApiError> response = advice.handleJwtSignatureException(ex);
+        ResponseEntity<ApiError> response = advice.handleJwtException(ex);
 
-        assertEquals(org.springframework.http.HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("SECURITY ALERT: JWT Signature Mismatch", response.getBody().getMessage());
+        assertNull(response.getBody().getStackTrace());
         verify(emailService).sendWithStack(eq(ex), eq("SECURITY ALERT: JWT Signature Mismatch"), anyString());
     }
 
@@ -150,14 +154,15 @@ public class ErrorControllerAdviceTest {
     public void testJwtException() {
         EmailService emailService = mock(EmailService.class);
         ErrorControllerAdvice advice = new ErrorControllerAdvice(emailService);
-        JwtException ex = new JwtException("jwt error");
+        ExpiredJwtException ex = new ExpiredJwtException(null, null, "expired");
 
-        org.springframework.http.ResponseEntity<ApiError> response = advice.handleJwtException(ex);
+        ResponseEntity<ApiError> response = advice.handleJwtException(ex);
 
-        assertEquals(org.springframework.http.HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("JWT Exception", response.getBody().getMessage());
+        assertNull(response.getBody().getStackTrace());
         verify(emailService).sendWithStack(eq(ex), eq("JWT Exception"), anyString());
-    } 
+    }
 
     @Test
     @WithMockUhOwner

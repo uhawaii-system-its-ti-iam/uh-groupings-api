@@ -111,11 +111,11 @@ public class TestJwtAuthenticationFilter {
         MockFilterChain filterChain = new MockFilterChain();
 
         // The filter now hands JwtException off to ErrorControllerAdvice (via HandlerExceptionResolver)
-        // instead of letting it escape, so the response reflects handleJwtSignatureException's FORBIDDEN
+        // instead of letting it escape, so the response reflects handleJwtException's UNAUTHORIZED
         // status rather than an exception propagating out of doFilterInternal.
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(403, response.getStatus());
+        assertEquals(401, response.getStatus());
         assertTrue(response.getContentAsString().contains("SECURITY ALERT: JWT Signature Mismatch"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -131,11 +131,11 @@ public class TestJwtAuthenticationFilter {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        // ExpiredJwtException is a JwtException subtype without its own handler, so it falls through
-        // to handleJwtException's catch-all instead of escaping doFilterInternal.
+        // ExpiredJwtException is a JwtException subtype, so handleJwtException answers it with the
+        // generic message instead of it escaping doFilterInternal.
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(403, response.getStatus());
+        assertEquals(401, response.getStatus());
         assertTrue(response.getContentAsString().contains("JWT Exception"));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -143,15 +143,17 @@ public class TestJwtAuthenticationFilter {
     }
 
     @Test
-    public void emptyBearerTokenTest() {
+    public void emptyBearerTokenTest() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer ");
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        assertThrows(IllegalArgumentException.class, () -> 
-            jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
-        );
+        // An empty token is treated like a missing header: the request continues unauthenticated and
+        // Spring Security's entry point answers 401, instead of the parser's IllegalArgumentException escaping.
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertNotNull(filterChain.getRequest(), "Request should continue down the filter chain");
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNull(auth, "Authentication should not be set when Bearer token is empty");
