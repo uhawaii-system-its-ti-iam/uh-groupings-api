@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -59,6 +60,9 @@ public class UpdateMemberServiceTest {
     @MockitoSpyBean
     private UpdateTimestampService updateTimestampService;
 
+    @MockitoSpyBean
+    private MemberService memberService;
+
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -67,6 +71,15 @@ public class UpdateMemberServiceTest {
 
     @Value("${groupings.api.test.admin_user}")
     private String ADMIN;
+
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
+
+    @Value("${groupings.api.assign_type_imm_mem}")
+    private String ASSIGN_TYPE_IMM_MEM;
+
+    @Value("${groupings.api.operation_assign_attribute}")
+    private String OPERATION_ASSIGN_ATTRIBUTE;
 
     private final String groupPath = "group-path";
 
@@ -415,7 +428,25 @@ public class UpdateMemberServiceTest {
         assertNotNull(groupAttributeResults);
         doReturn(groupAttributeResults).when(grouperService).groupAttributeResult(TEST_UIDS.get(1), groupPath);
 
+        doReturn(false).when(memberService)
+                .isInclude(groupPath, TEST_UIDS.get(1));
+
+        doReturn(null).when(grouperService)
+                .assignMembershipAttributesResults(
+                        ASSIGN_TYPE_IMM_MEM,
+                        OPERATION_ASSIGN_ATTRIBUTE,
+                        groupPath + GroupType.INCLUDE.value(),
+                        TEST_UIDS.get(1),
+                        SELF_OPTED);
+
         assertNotNull(updateMemberService.optIn(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
+
+        verify(grouperService).assignMembershipAttributesResults(
+                ASSIGN_TYPE_IMM_MEM,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupPath + GroupType.INCLUDE.value(),
+                TEST_UIDS.get(1),
+                SELF_OPTED);
     }
 
     @Test
@@ -445,6 +476,24 @@ public class UpdateMemberServiceTest {
         assertNotNull(groupAttributeResults);
         doReturn(groupAttributeResults).when(grouperService).groupAttributeResult(TEST_UIDS.get(1), groupPath);
 
+        doReturn(true).when(memberService)
+                .isInclude(groupPath, TEST_UIDS.get(1));
+
+        doReturn(null).when(grouperService)
+                .assignMembershipAttributesResults(
+                        ASSIGN_TYPE_IMM_MEM,
+                        OPERATION_ASSIGN_ATTRIBUTE,
+                        groupPath + GroupType.EXCLUDE.value(),
+                        TEST_UIDS.get(1),
+                        SELF_OPTED);
+
         assertNotNull(updateMemberService.optOut(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
+
+        verify(grouperService).assignMembershipAttributesResults(
+                ASSIGN_TYPE_IMM_MEM,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupPath + GroupType.EXCLUDE.value(),
+                TEST_UIDS.get(1),
+                SELF_OPTED);
     }
 }
