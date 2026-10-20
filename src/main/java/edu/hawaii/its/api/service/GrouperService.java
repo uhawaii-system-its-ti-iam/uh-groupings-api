@@ -55,6 +55,8 @@ public interface GrouperService {
 
     GroupAttributeResults groupAttributeResults(List<String> attributes, List<String> groupPaths);
 
+    GroupAttributeResults membershipAttributeResults(String assignType, String attributeName, String groupPath, String uhIdentifier);
+
     GroupAttributeResults groupAttributeResult(String groupPath);
 
     GroupAttributeResults groupAttributeResult(String currentUser, String groupPath);
@@ -90,6 +92,8 @@ public interface GrouperService {
     AssignAttributesResults assignAttributesResults(String currentUser, String assignType, String assignOperation, String groupPath, String attributeName);
 
     AssignAttributesResults assignAttributesResults(String currentUser, String assignType, String assignOperation, String groupPath, String attributeName, boolean retry);
+
+    AssignAttributesResults assignMembershipAttributesResults(String assignType, String assignOperation, String groupPath, String uhIdentifier, String attributeName);
 
     AssignGrouperPrivilegesResult assignGrouperPrivilegesResult(String currentUser, String groupPath, String privilegeName, String uhIdentifier, boolean isAllowed);
 

@@ -31,6 +31,10 @@ import edu.hawaii.its.api.wrapper.RemoveMembersCommand;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
 import edu.hawaii.its.api.wrapper.SubjectsCommand;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
+import edu.hawaii.its.api.wrapper.GetMembershipsCommand;
+import edu.hawaii.its.api.wrapper.GetMembershipsResults;
+
+import edu.internet2.middleware.grouperClient.ws.beans.WsMembership;
 
 public class GrouperApiService implements GrouperService {
 
@@ -231,6 +235,21 @@ public class GrouperApiService implements GrouperService {
         return exec.execute(groupAttributeCommand);
     }
 
+    @Override
+    public GroupAttributeResults membershipAttributeResults(
+            String assignType,
+            String attributeName,
+            String groupPath,
+            String uhIdentifier) {
+
+        String membershipId = immediateMembershipId(groupPath, uhIdentifier);
+
+        return exec.execute(new GroupAttributeCommand()
+                .setAssignType(assignType)
+                .addAttribute(attributeName)
+                .addMembershipId(membershipId));
+    }
+
     /**
      * Get all groups that a uhIdentifier is listed in.
      */
@@ -282,6 +301,22 @@ public class GrouperApiService implements GrouperService {
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .addGroupPaths(groupPaths));
         return getMembersResults;
+    }
+
+    public String immediateMembershipId(String groupPath, String uhIdentifier) {
+        GetMembershipsResults results =
+                exec.execute(new GetMembershipsCommand()
+                        .addGroup(groupPath)
+                        .addSubject(uhIdentifier)
+                        .immediateOnly());
+
+        WsMembership[] memberships = results.getWsMemberships();
+
+        if (memberships == null || memberships.length == 0) {
+            return null;
+        }
+
+        return memberships[0].getImmediateMembershipId();
     }
 
     /**
@@ -425,6 +460,23 @@ public class GrouperApiService implements GrouperService {
                 .addGroupPath(groupPath)
                 .addAttribute(attributeName)
                 .setRetry(retry));
+    }
+
+    @Override
+    public AssignAttributesResults assignMembershipAttributesResults(
+            String assignType,
+            String assignOperation,
+            String groupPath,
+            String uhIdentifier,
+            String attributeName) {
+
+        String membershipId = immediateMembershipId(groupPath, uhIdentifier);
+
+        return exec.execute(new AssignAttributesCommand()
+                .setAssignType(assignType)
+                .setAssignOperation(assignOperation)
+                .addMembershipId(membershipId)
+                .addAttribute(attributeName));
     }
 
     /**
