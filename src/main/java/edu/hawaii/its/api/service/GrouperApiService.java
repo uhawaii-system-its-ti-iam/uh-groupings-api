@@ -2,6 +2,8 @@ package edu.hawaii.its.api.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.IntConsumer;
 
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersCommand;
@@ -34,10 +36,19 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 public class GrouperApiService implements GrouperService {
 
+    private static final IntConsumer IGNORE_BATCHES = count -> {
+    };
+
     private final ExecutorService exec;
-    
-    public GrouperApiService(ExecutorService exec) {
+
+    /**
+     * Sends the bulk lookup, add and remove to Grouper in batches.
+     */
+    private final BatchExecutor batchExecutor;
+
+    public GrouperApiService(ExecutorService exec, BatchExecutor batchExecutor) {
         this.exec = exec;
+        this.batchExecutor = batchExecutor;
     }
 
     /**
@@ -106,12 +117,20 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Check if multiple UH identifiers are valid.
+     * Check if multiple UH identifiers are valid. A long list is looked up in batches (see BatchExecutor).
      */
     public SubjectsResults getSubjects(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = exec.execute(new SubjectsCommand()
-                .addSubjects(uhIdentifiers));
-        return subjectsResults;
+        return getSubjects(uhIdentifiers, null, IGNORE_BATCHES);
+    }
+
+    /**
+     * Check if multiple UH identifiers are valid, looking them up in the subject source sourceId only, or in every
+     * source when sourceId is null. A long list is looked up in batches (see BatchExecutor); onBatchDone is called
+     * with the number of identifiers in each batch that Grouper has answered.
+     */
+    public SubjectsResults getSubjects(List<String> uhIdentifiers, String sourceId, IntConsumer onBatchDone) {
+        return batchExecutor.lookup(uhIdentifiers, batch -> new SubjectsCommand()
+                .addSubjects(batch, sourceId), SubjectsResults::merge, onBatchDone);
     }
 
     /**
@@ -128,11 +147,20 @@ public class GrouperApiService implements GrouperService {
      * Get all immediate members of a grouping path (members with the "IMMEDIATE" filter)
      */
     public GetMembersResult getImmediateMembers(String currentUser, String groupPath) {
+        return getImmediateMembers(currentUser, groupPath, true);
+    }
+
+    /**
+     * Get all immediate members of a group path. Without subject details, each member carries only its subject id
+     * (its UH number, or a group's uuid), which Grouper lists several times faster than members with details.
+     */
+    public GetMembersResult getImmediateMembers(String currentUser, String groupPath, boolean includeSubjectDetail) {
         MemberFilter memberFilter = MemberFilter.IMMEDIATE;
         GetMembersResults getMembersResults = exec.execute(new GetMembersCommand()
                 .owner(currentUser)
                 .addGroupPath(groupPath)
-                .assignMemberFilter(memberFilter));
+                .assignMemberFilter(memberFilter)
+                .includeSubjectDetail(includeSubjectDetail));
         List<GetMembersResult> result = getMembersResults.getMembersResults();
         if (result.isEmpty()) {
             return new GetMembersResult();
@@ -318,19 +346,29 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Add multiple UH identifiers to a group listing.
+     * Add multiple UH identifiers to a group listing. A long list is added in batches (see BatchExecutor).
+     */
+    public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+        return addMembers(currentUser, groupPath, uhIdentifiers, Map.of(), IGNORE_BATCHES);
+    }
+
+    /**
+     * Add multiple UH identifiers to a group listing, each looked up only in its subject source in sourceIds, or in
+     * every source when it has none there. A long list is added in batches (see BatchExecutor); onBatchDone is called
+     * with the number of identifiers in each batch that Grouper has answered.
      * Grouper's GcAddMember client rejects a zero-subject request outright ("Need at least one subject to
      * add to group") since it's ambiguous whether that means "add nothing" or a caller mistake, so an empty
      * list is short-circuited here instead of being sent to Grouper.
      */
-    public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+    public AddMembersResults addMembers(String currentUser, String groupPath, List<String> uhIdentifiers,
+            Map<String, String> sourceIds, IntConsumer onBatchDone) {
         if (uhIdentifiers.isEmpty()) {
             return new AddMembersResults();
         }
-        return exec.execute(new AddMembersCommand()
+        return batchExecutor.add(groupPath, uhIdentifiers, batch -> new AddMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
+                .addUhIdentifiers(batch, sourceIds), AddMembersResults::merge, onBatchDone);
     }
 
     /**
@@ -357,18 +395,28 @@ public class GrouperApiService implements GrouperService {
     }
 
     /**
-     * Remove multiple UH identifiers from a group listing.
+     * Remove multiple UH identifiers from a group listing. A long list is removed in batches (see BatchExecutor).
+     */
+    public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+        return removeMembers(currentUser, groupPath, uhIdentifiers, Map.of(), IGNORE_BATCHES);
+    }
+
+    /**
+     * Remove multiple UH identifiers from a group listing, each looked up only in its subject source in sourceIds, or
+     * in every source when it has none there. A long list is removed in batches (see BatchExecutor); onBatchDone is
+     * called with the number of identifiers in each batch that Grouper has answered.
      * Mirrors the addMembers guard above: GcDeleteMember has no "replace all" escape hatch at all, so it
      * always rejects a zero-subject request.
      */
-    public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers) {
+    public RemoveMembersResults removeMembers(String currentUser, String groupPath, List<String> uhIdentifiers,
+            Map<String, String> sourceIds, IntConsumer onBatchDone) {
         if (uhIdentifiers.isEmpty()) {
             return new RemoveMembersResults();
         }
-        return exec.execute(new RemoveMembersCommand()
+        return batchExecutor.remove(uhIdentifiers, batch -> new RemoveMembersCommand()
                 .owner(currentUser)
                 .assignGroupPath(groupPath)
-                .addUhIdentifiers(uhIdentifiers));
+                .addUhIdentifiers(batch, sourceIds), RemoveMembersResults::merge, onBatchDone);
     }
 
     /**

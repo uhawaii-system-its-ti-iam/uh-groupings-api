@@ -30,6 +30,7 @@ import edu.hawaii.its.api.exception.OwnerLimitExceededException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
 import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
+import edu.hawaii.its.api.type.AsyncJobProgress;
 import edu.hawaii.its.api.type.OptType;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
@@ -208,7 +209,7 @@ public class TestUpdateMemberService {
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids, new AsyncJobProgress()).join();
         for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
@@ -220,7 +221,7 @@ public class TestUpdateMemberService {
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, testUids, new AsyncJobProgress()).join();
         for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
@@ -232,14 +233,14 @@ public class TestUpdateMemberService {
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids).join();
-        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids, new AsyncJobProgress()).join();
+        updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, testUids, new AsyncJobProgress()).join();
         for (String uid : testUids) {
             assertFalse(memberService.isMember(GROUPING_INCLUDE, uid));
             assertTrue(memberService.isMember(GROUPING_EXCLUDE, uid));
         }
 
-        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids).join();
+        updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, testUids, new AsyncJobProgress()).join();
         for (String uid : testUids) {
             assertTrue(memberService.isMember(GROUPING_INCLUDE, uid));
             assertFalse(memberService.isMember(GROUPING_EXCLUDE, uid));

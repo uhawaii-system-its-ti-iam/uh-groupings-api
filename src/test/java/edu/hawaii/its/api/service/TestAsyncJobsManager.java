@@ -56,12 +56,14 @@ public class TestAsyncJobsManager {
         assertEquals("NOT_FOUND", asyncJobResult.getStatus());
         assertEquals("", asyncJobResult.getResult());
 
+        // Reading a finished job doesn't make it not found: every read gets the same answer until the job is evicted,
+        // 10 minutes after it finished (see AsyncJobsManagerTest).
         Integer jobId = asyncJobsManager.putJob(CompletableFuture.completedFuture("SUCCESS"));
         asyncJobsManager.getJobResult(jobId);
         asyncJobResult = asyncJobsManager.getJobResult(jobId);
         assertEquals(jobId, asyncJobResult.getId());
-        assertEquals("NOT_FOUND", asyncJobResult.getStatus());
-        assertEquals("", asyncJobResult.getResult());
+        assertEquals("COMPLETED", asyncJobResult.getStatus());
+        assertEquals("SUCCESS", asyncJobResult.getResult());
         MockSecurityContext.clearContext();
     }
 

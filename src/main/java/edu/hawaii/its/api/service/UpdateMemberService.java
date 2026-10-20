@@ -1,7 +1,10 @@
 package edu.hawaii.its.api.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import edu.hawaii.its.api.exception.DirectOwnerRemovedException;
 import edu.hawaii.its.api.exception.OwnerLimitExceededException;
@@ -20,12 +23,15 @@ import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResult;
 import edu.hawaii.its.api.groupings.GroupingRemoveResults;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
+import edu.hawaii.its.api.type.AsyncJobProgress;
 import edu.hawaii.its.api.type.GroupType;
 import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 import edu.hawaii.its.api.wrapper.AddMemberResult;
 import edu.hawaii.its.api.wrapper.AddMembersResults;
+import edu.hawaii.its.api.wrapper.GrouperCommand;
 import edu.hawaii.its.api.wrapper.RemoveMemberResult;
 import edu.hawaii.its.api.wrapper.RemoveMembersResults;
+import edu.hawaii.its.api.wrapper.Subject;
 
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
 
@@ -40,6 +46,9 @@ public class UpdateMemberService {
 
     @Value("${groupings.max.owner.limit}")
     private Integer OWNERS_LIMIT;
+
+    @Value("${groupings.api.grouper.update-batch-size}")
+    private Integer UPDATE_BATCH_SIZE;
 
     private final UpdateTimestampService timestampService;
 
@@ -158,27 +167,24 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
-        GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                groupingPath + GroupType.EXCLUDE.value(), validationResult.getValidIdentifiers());
-        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
-        return result;
+        return moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
+                groupingPath + GroupType.EXCLUDE.value(), uhIdentifiers, new AsyncJobProgress());
     }
 
+    /**
+     * Like addIncludeMembers, as an async job that reports its progress in progress. The job runs in this method, on
+     * the async executor's thread.
+     */
     @Async
     public CompletableFuture<GroupingMoveMembersResult> addIncludeMembersAsync(String currentUser, String groupingPath,
-            List<String> uhIdentifiers) {
+            List<String> uhIdentifiers, AsyncJobProgress progress) {
         log.info(String.format("addIncludeMembersAsync; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;",
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
-        return CompletableFuture.supplyAsync(() -> {
-            GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                    groupingPath + GroupType.EXCLUDE.value(), validationResult.getValidIdentifiers());
-            result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
-            return result;
-        });
+        return CompletableFuture.completedFuture(moveGroupMembers(currentUser,
+                groupingPath + GroupType.INCLUDE.value(), groupingPath + GroupType.EXCLUDE.value(), uhIdentifiers,
+                progress));
     }
 
     public GroupingMoveMemberResult addIncludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -195,27 +201,24 @@ public class UpdateMemberService {
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
-        GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                groupingPath + GroupType.INCLUDE.value(), validationResult.getValidIdentifiers());
-        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
-        return result;
+        return moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
+                groupingPath + GroupType.INCLUDE.value(), uhIdentifiers, new AsyncJobProgress());
     }
 
+    /**
+     * Like addExcludeMembers, as an async job that reports its progress in progress. The job runs in this method, on
+     * the async executor's thread.
+     */
     @Async
     public CompletableFuture<GroupingMoveMembersResult> addExcludeMembersAsync(String currentUser, String groupingPath,
-            List<String> uhIdentifiers) {
+            List<String> uhIdentifiers, AsyncJobProgress progress) {
         log.info(String.format("addExcludeMembersAsync; currentUser: %s; groupingPath: %s; uhIdentifiers: %s;",
                 currentUser, groupingPath, uhIdentifiers));
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
-        UhIdentifierValidationResult validationResult = subjectService.validateUhIdentifiers(currentUser, uhIdentifiers);
-        return CompletableFuture.supplyAsync(() -> {
-            GroupingMoveMembersResult result = moveGroupMembers(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                    groupingPath + GroupType.INCLUDE.value(), validationResult.getValidIdentifiers());
-            result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
-            return result;
-        });
+        return CompletableFuture.completedFuture(moveGroupMembers(currentUser,
+                groupingPath + GroupType.EXCLUDE.value(), groupingPath + GroupType.INCLUDE.value(), uhIdentifiers,
+                progress));
     }
 
     public GroupingMoveMemberResult addExcludeMember(String currentUser, String groupingPath, String uhIdentifier) {
@@ -320,7 +323,7 @@ public class UpdateMemberService {
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String groupPath = groupPathService.getIncludeGroup(groupingPath);
-        return CompletableFuture.supplyAsync(() -> resetGroup(groupPath));
+        return CompletableFuture.completedFuture(resetGroup(groupPath));
     }
 
     /**
@@ -345,7 +348,7 @@ public class UpdateMemberService {
         groupPathService.checkPath(currentUser, groupingPath);
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         String groupPath = groupPathService.getExcludeGroup(groupingPath);
-        return CompletableFuture.supplyAsync(() -> resetGroup(groupPath));
+        return CompletableFuture.completedFuture(resetGroup(groupPath));
     }
 
     /**
@@ -381,17 +384,60 @@ public class UpdateMemberService {
         }
     }
 
+    /**
+     * Validate the uhIdentifiers, then move the valid ones from the group at removeGroupPath to the group at
+     * addGroupPath, reporting each step in progress. The adds and removes look each member up only in the subject
+     * source the validation found it in, which Grouper does faster than looking in every source.
+     */
     private GroupingMoveMembersResult moveGroupMembers(String currentUser, String addGroupPath, String removeGroupPath,
-            List<String> uhIdentifiers) {
-        RemoveMembersResults removeMembersResults =
-                grouperService.removeMembers(currentUser, removeGroupPath, uhIdentifiers);
-        AddMembersResults addMembersResults = grouperService.addMembers(currentUser, addGroupPath, uhIdentifiers);
+            List<String> uhIdentifiers, AsyncJobProgress progress) {
+        UhIdentifierValidationResult validationResult =
+                subjectService.validateUhIdentifiers(currentUser, uhIdentifiers, progress);
+        List<String> validIdentifiers = validationResult.getValidIdentifiers();
+        Map<String, String> sourceIds = validationResult.getSubjectSourceIds();
+
+        List<String> membersToRemove = membersToRemove(currentUser, removeGroupPath, validIdentifiers);
+        if (!membersToRemove.isEmpty()) {
+            progress.start(AsyncJobProgress.Phase.REMOVING, membersToRemove.size());
+        }
+        RemoveMembersResults removeMembersResults = grouperService.removeMembers(currentUser, removeGroupPath,
+                membersToRemove, sourceIds, progress::addDone);
+
+        progress.start(AsyncJobProgress.Phase.ADDING, validIdentifiers.size());
+        AddMembersResults addMembersResults = grouperService.addMembers(currentUser, addGroupPath, validIdentifiers,
+                sourceIds, progress::addDone);
+
         GroupingMoveMembersResult result = new GroupingMoveMembersResult(addMembersResults, removeMembersResults);
+        result.setInvalidUhIdentifiers(validationResult.getInvalidIdentifiers());
         if (grouperService instanceof GrouperApiService) {
             timestampService.update(result.getAddResults());
             timestampService.update(result.getRemoveResults());
         }
         return result;
+    }
+
+    /**
+     * The uhIdentifiers to remove from the group at removeGroupPath when they are moved to the opposite list.
+     * Removing a member who is not listed succeeds without doing anything, but Grouper still has to resolve them, and
+     * the members of an import are almost never on the opposite list. So a list too long for one Grouper request is
+     * narrowed, with one request for the group's member ids, to the members listed there: an import then sends no
+     * removal requests at all, instead of one per batch. An identifier that is not a UH number can't be matched to a
+     * member id, so it is always kept.
+     */
+    private List<String> membersToRemove(String currentUser, String removeGroupPath, List<String> uhIdentifiers) {
+        if (uhIdentifiers.size() <= UPDATE_BATCH_SIZE) {
+            return uhIdentifiers;
+        }
+        Set<String> listed = grouperService.getImmediateMembers(currentUser, removeGroupPath, false).getSubjects()
+                .stream()
+                .map(Subject::getUhUuid)
+                .collect(Collectors.toSet());
+        List<String> membersToRemove = uhIdentifiers.stream()
+                .filter(uhIdentifier -> listed.contains(uhIdentifier) || !GrouperCommand.isUhUuid(uhIdentifier))
+                .toList();
+        log.info(String.format("membersToRemove; removeGroupPath: %s; removing: %d of %d;",
+                removeGroupPath, membersToRemove.size(), uhIdentifiers.size()));
+        return membersToRemove;
     }
 
     private GroupingMoveMemberResult moveGroupMember(String currentUser, String addGroupPath, String removeGroupPath,
