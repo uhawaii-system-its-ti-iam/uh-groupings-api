@@ -1,6 +1,8 @@
 package edu.hawaii.its.api.filter;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -29,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
+import edu.hawaii.its.api.service.SecurityContextRoleService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -41,13 +44,16 @@ public class TestJwtAuthenticationFilter {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private SecurityContextRoleService securityContextRoleService;
+
     @Value("${jwt.secret.key}")
     private String SECRET_KEY;
 
     @Value("${groupings.api.test.admin_user}")
     private String TEST_ADMIN;
 
-    private final List<String> ADMIN_ROLES = List.of("ROLE_UH", "ROLE_ADMIN");
+    private final List<String> ADMIN_ROLES = List.of("UH", "ADMIN");
     private final long TEST_EXPIRATION_TIME = 100000L; // 100 seconds
 
     @BeforeEach
@@ -69,12 +75,104 @@ public class TestJwtAuthenticationFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth, "Authentication should be set for valid token");
         assertTrue(auth.getPrincipal() instanceof UserDetails);
-        
+
         UserDetails userDetails = (UserDetails) auth.getPrincipal();
         assertEquals(TEST_ADMIN, userDetails.getUsername());
 
+        // The token carries plain role names; the filter is what turns them into
+        // ROLE_-prefixed authorities.
         assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_UH")));
         assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+    }
+
+    @Test
+    public void prefixedRolesFromAnOlderUiAuthenticateTest() throws Exception {
+        String validToken = generateToken(TEST_ADMIN, List.of("ROLE_UH", "ROLE_ADMIN"), TEST_EXPIRATION_TIME);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + validToken);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain filterChain = new MockFilterChain();
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth, "Authentication should be set for a token with prefixed roles");
+
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_UH")));
+        assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        assertFalse(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ROLE_ADMIN")));
+    }
+
+    /**
+     * The regression this addresses: the UI sends plain role names, and an admin must
+     * come out of the filter holding the ADMIN role, which is what gates the admin table.
+     * Before authority mapping existed, "ADMIN" became an ADMIN authority rather than
+     * ROLE_ADMIN, isCurrentUserAdmin() returned false, and the admin table broke.
+     */
+    @Test
+    public void plainRolesFromTheUiGrantTheAdminRoleTest() throws Exception {
+        String validToken = generateToken(TEST_ADMIN, ADMIN_ROLES, TEST_EXPIRATION_TIME);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + validToken);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain filterChain = new MockFilterChain();
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertTrue(securityContextRoleService.isCurrentUserAdmin(), "An ADMIN token should grant the admin role");
+        assertFalse(securityContextRoleService.isCurrentUserOwner());
+    }
+
+    @Test
+    public void plainRolesFromTheUiGrantTheOwnerRoleTest() throws Exception {
+        String validToken = generateToken(TEST_ADMIN, List.of("UH", "OWNER"), TEST_EXPIRATION_TIME);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + validToken);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain filterChain = new MockFilterChain();
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertTrue(securityContextRoleService.isCurrentUserOwner(), "An OWNER token should grant the owner role");
+        assertFalse(securityContextRoleService.isCurrentUserAdmin());
+    }
+
+    @Test
+    public void unknownRoleDoesNotGrantAdminTest() throws Exception {
+        String validToken = generateToken(TEST_ADMIN, List.of("UH", "SUPERUSER"), TEST_EXPIRATION_TIME);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + validToken);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain filterChain = new MockFilterChain();
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        assertFalse(securityContextRoleService.isCurrentUserAdmin());
+        assertFalse(securityContextRoleService.isCurrentUserOwner());
+    }
+
+    @Test
+    public void unknownRoleIsDiscardedTest() throws Exception {
+        String validToken = generateToken(TEST_ADMIN, List.of("UH", "SUPERUSER"), TEST_EXPIRATION_TIME);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Authorization", "Bearer " + validToken);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain filterChain = new MockFilterChain();
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth, "Authentication should be set for a token with a known role");
+
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        assertEquals(1, userDetails.getAuthorities().size());
+        assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_UH")));
     }
 
     @Test
@@ -144,7 +242,7 @@ public class TestJwtAuthenticationFilter {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        assertThrows(IllegalArgumentException.class, () -> 
+        assertThrows(IllegalArgumentException.class, () ->
             jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
         );
 
@@ -167,12 +265,14 @@ public class TestJwtAuthenticationFilter {
         MockHttpServletResponse response = new MockHttpServletResponse();
         MockFilterChain filterChain = new MockFilterChain();
 
-        assertThrows(NullPointerException.class, () -> 
-            jwtAuthenticationFilter.doFilterInternal(request, response, filterChain)
-        );
+        assertDoesNotThrow(() -> jwtAuthenticationFilter.doFilterInternal(request, response, filterChain));
 
+        // A signature-valid token with no roles claim authenticates the user, but grants
+        // no authority, so every role check denies them. This previously threw a
+        // NullPointerException out of the filter and surfaced as a 500.
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        assertNull(auth, "Authentication should not be set when token is missing roles claim");
+        assertNotNull(auth, "Authentication should be set when the token is otherwise valid");
+        assertTrue(auth.getAuthorities().isEmpty(), "A token with no roles claim should grant no authority");
     }
 
     // #######################################################
