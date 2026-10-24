@@ -13,5 +13,7 @@
 - [ ] Exhibits Clear Code Structure:
 - [ ] Project Unit Tests Passed:
 - [ ] Project Integration Tests Passed:
+- [ ] AngularJS Unit Test Passed:
+- [ ] React Unit Tests Passed:
 - [ ] Executes Expected Functionality:
 - [ ] Tested For Incorrect/Unexpected Inputs:
