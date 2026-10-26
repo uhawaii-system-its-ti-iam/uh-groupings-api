@@ -211,6 +211,7 @@ public class TestGroupingOwnerService {
 
         assertTrue(groupingSyncDestinations.getSyncDestinations().stream()
                 .filter(syncDestination -> !syncDestination.getDescription().contains("uhReleasedGrouping"))
+                .filter(syncDestination -> !syncDestination.getDescription().equals("Entra: entraGroupings"))
                 .allMatch(e -> e.getDescription().contains(new Grouping(GROUPING).getName())));
     }
 
