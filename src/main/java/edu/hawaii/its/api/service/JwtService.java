@@ -18,8 +18,14 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret.key}")
-    private String SECRET_KEY;
+    private final SecretKey signInKey;
+
+    // The key is built once so a bad jwt.secret.key fails at startup. Building it per request would
+    // throw a JwtException subtype (DecodingException, WeakKeyException) that is indistinguishable
+    // from a bad client token and would be answered with 401 instead of exposing the misconfiguration.
+    public JwtService(@Value("${jwt.secret.key}") String secretKey) {
+        this.signInKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -49,14 +55,9 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey())
+                .verifyWith(signInKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
