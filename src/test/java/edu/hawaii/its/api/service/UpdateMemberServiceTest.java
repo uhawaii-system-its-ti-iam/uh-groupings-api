@@ -3,6 +3,7 @@ package edu.hawaii.its.api.service;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -45,6 +46,9 @@ public class UpdateMemberServiceTest {
     @MockitoSpyBean
     private GrouperService grouperService;
 
+    @MockitoSpyBean
+    private MemberService memberService;
+
     @Value("${groupings.api.grouping_admins}")
     private String GROUPING_ADMINS;
 
@@ -54,8 +58,16 @@ public class UpdateMemberServiceTest {
     @Value("${groupings.max.owner.limit}")
     private Integer OWNER_LIMIT;
 
-    private String groupPath = "group-path";
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
 
+    @Value("${groupings.api.assign_type_imm_mem}")
+    private String ASSIGN_TYPE_IMM_MEM;
+
+    @Value("${groupings.api.operation_assign_attribute}")
+    private String OPERATION_ASSIGN_ATTRIBUTE;
+
+    private String groupPath = "group-path";
     @Test
     public void addAdminTest() {
         HasMembersResults hasMembersResults = groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData();
@@ -328,7 +340,25 @@ public class UpdateMemberServiceTest {
         assertNotNull(groupAttributeResults);
         doReturn(groupAttributeResults).when(grouperService).groupAttributeResult(TEST_UIDS.get(1), groupPath);
 
+        doReturn(false).when(memberService)
+                .isInclude(groupPath, TEST_UIDS.get(1));
+
+        doReturn(null).when(grouperService)
+                .assignMembershipAttributesResults(
+                        ASSIGN_TYPE_IMM_MEM,
+                        OPERATION_ASSIGN_ATTRIBUTE,
+                        groupPath + GroupType.INCLUDE.value(),
+                        TEST_UIDS.get(1),
+                        SELF_OPTED);
+
         assertNotNull(updateMemberService.optIn(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
+
+        verify(grouperService).assignMembershipAttributesResults(
+                ASSIGN_TYPE_IMM_MEM,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupPath + GroupType.INCLUDE.value(),
+                TEST_UIDS.get(1),
+                SELF_OPTED);
     }
 
     @Test
@@ -358,6 +388,24 @@ public class UpdateMemberServiceTest {
         assertNotNull(groupAttributeResults);
         doReturn(groupAttributeResults).when(grouperService).groupAttributeResult(TEST_UIDS.get(1), groupPath);
 
+        doReturn(true).when(memberService)
+                .isInclude(groupPath, TEST_UIDS.get(1));
+
+        doReturn(null).when(grouperService)
+                .assignMembershipAttributesResults(
+                        ASSIGN_TYPE_IMM_MEM,
+                        OPERATION_ASSIGN_ATTRIBUTE,
+                        groupPath + GroupType.EXCLUDE.value(),
+                        TEST_UIDS.get(1),
+                        SELF_OPTED);
+
         assertNotNull(updateMemberService.optOut(TEST_UIDS.get(0), groupPath, TEST_UIDS.get(1)));
+
+        verify(grouperService).assignMembershipAttributesResults(
+                ASSIGN_TYPE_IMM_MEM,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupPath + GroupType.EXCLUDE.value(),
+                TEST_UIDS.get(1),
+                SELF_OPTED);
     }
 }

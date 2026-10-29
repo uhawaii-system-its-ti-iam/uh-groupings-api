@@ -330,4 +330,27 @@ public class OotbGrouperApiService implements GrouperService {
             Integer pageSize, String sortString, Boolean isAscending) {
         return ootbGroupingPropertiesService.getOwnedGroupings(groupPaths);
     }
+
+    /**
+     * TODO: NEEDS TO BE IMPLEMENTED if we decide to use OOTB.
+     */
+    public GroupAttributeResults membershipAttributeResults(
+            String assignType,
+            String attributeName,
+            String groupPath,
+            String uhIdentifier) {
+        return null;
+    }
+
+    /**
+     * TODO: NEEDS TO BE IMPLEMENTED if we decide to use OOTB.
+     */
+    public AssignAttributesResults assignMembershipAttributesResults(
+            String assignType,
+            String assignOperation,
+            String groupPath,
+            String uhIdentifier,
+            String attributeName) {
+        return null;
+    }
 }

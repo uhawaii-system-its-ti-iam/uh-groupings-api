@@ -2,6 +2,7 @@ package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -27,6 +28,7 @@ import edu.hawaii.its.api.groupings.GroupingMembers;
 import edu.hawaii.its.api.groupings.GroupingReplaceGroupMembersResult;
 import edu.hawaii.its.api.type.OptType;
 import edu.internet2.middleware.grouperClient.ws.GcWebServiceError;
+import edu.hawaii.its.api.wrapper.GroupAttributeResults;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -53,6 +55,12 @@ public class TestUpdateMemberService {
 
     @Value("${groupings.api.success}")
     private String SUCCESS;
+
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
+
+    @Value("${groupings.api.assign_type_imm_mem}")
+    private String ASSIGN_TYPE_IMM_MEM;
 
     @Autowired
     private UpdateMemberService updateMemberService;
@@ -284,9 +292,44 @@ public class TestUpdateMemberService {
         assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
         assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
 
+        // opt out same uhUuid again, nothing should change
+        updateMemberService.optOut(ADMIN, GROUPING, num);
+        assertFalse(memberService.isMember(GROUPING_INCLUDE, num));
+        assertTrue(memberService.isMember(GROUPING_EXCLUDE, num));
+
+        GroupAttributeResults excludeAttributes =
+                grouperService.membershipAttributeResults(
+                        ASSIGN_TYPE_IMM_MEM,
+                        SELF_OPTED,
+                        GROUPING_EXCLUDE,
+                        num);
+
+        assertNotNull(excludeAttributes);
+        assertNotNull(excludeAttributes
+                .getWsGetAttributeAssignmentsResults()
+                .getWsAttributeAssigns());
+        assertTrue(excludeAttributes
+                .getWsGetAttributeAssignmentsResults()
+                .getWsAttributeAssigns().length > 0);
+
         updateMemberService.optIn(ADMIN, GROUPING, num);
         assertTrue(memberService.isMember(GROUPING_INCLUDE, num));
         assertFalse(memberService.isMember(GROUPING_EXCLUDE, num));
+
+        GroupAttributeResults includeAttributes =
+                grouperService.membershipAttributeResults(
+                        ASSIGN_TYPE_IMM_MEM,
+                        SELF_OPTED,
+                        GROUPING_INCLUDE,
+                        num);
+
+        assertNotNull(includeAttributes);
+        assertNotNull(includeAttributes
+                .getWsGetAttributeAssignmentsResults()
+                .getWsAttributeAssigns());
+        assertTrue(includeAttributes
+                .getWsGetAttributeAssignmentsResults()
+                .getWsAttributeAssigns().length > 0);
 
         removeGroupMember(GROUPING_INCLUDE, num);
     }

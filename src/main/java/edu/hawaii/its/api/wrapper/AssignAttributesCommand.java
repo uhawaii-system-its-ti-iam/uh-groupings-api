@@ -41,6 +41,11 @@ public class AssignAttributesCommand extends GrouperCommand<AssignAttributesComm
         return this;
     }
 
+    public AssignAttributesCommand addMembershipId(String membershipId) {
+        this.gcAssignAttributes.addOwnerMembershipId(membershipId);
+        return this;
+    }
+
     public AssignAttributesCommand addAttribute(String attribute) {
         this.gcAssignAttributes.addAttributeDefNameName(attribute);
         return this;

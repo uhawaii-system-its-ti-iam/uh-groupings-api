@@ -40,6 +40,15 @@ public class UpdateMemberService {
     @Value("${groupings.max.owner.limit}")
     private Integer OWNERS_LIMIT;
 
+    @Value("${groupings.api.self_opted}")
+    private String SELF_OPTED;
+
+    @Value("${groupings.api.assign_type_imm_mem}")
+    private String ASSIGN_TYPE_IMM_MEM;
+
+    @Value("${groupings.api.operation_assign_attribute}")
+    private String OPERATION_ASSIGN_ATTRIBUTE;
+
     private final UpdateTimestampService timestampService;
 
     private final SubjectService subjectService;
@@ -256,8 +265,21 @@ public class UpdateMemberService {
         if(memberService.isInclude(groupingPath, uhIdentifier)) {
             return new GroupingMoveMemberResult(groupingPath, "SUCCESS");
         }
-        return moveGroupMember(currentUser, groupingPath + GroupType.INCLUDE.value(),
-                groupingPath + GroupType.EXCLUDE.value(), uhIdentifier);
+
+        GroupingMoveMemberResult result =
+                moveGroupMember(currentUser,
+                        groupingPath + GroupType.INCLUDE.value(),
+                        groupingPath + GroupType.EXCLUDE.value(),
+                        uhIdentifier);
+
+        grouperService.assignMembershipAttributesResults(
+                ASSIGN_TYPE_IMM_MEM,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupingPath + GroupType.INCLUDE.value(),
+                uhIdentifier,
+                SELF_OPTED);
+
+        return result;
     }
 
     public GroupingMoveMemberResult optOut(String currentUser, String groupingPath, String uhIdentifier) {
@@ -268,8 +290,21 @@ public class UpdateMemberService {
         if(!memberService.isInclude(groupingPath, uhIdentifier)) {
             return new GroupingMoveMemberResult(groupingPath, "SUCCESS");
         }
-        return moveGroupMember(currentUser, groupingPath + GroupType.EXCLUDE.value(),
-                groupingPath + GroupType.INCLUDE.value(), uhIdentifier);
+
+        GroupingMoveMemberResult result =
+                moveGroupMember(currentUser,
+                        groupingPath + GroupType.EXCLUDE.value(),
+                        groupingPath + GroupType.INCLUDE.value(),
+                        uhIdentifier);
+
+        grouperService.assignMembershipAttributesResults(
+                ASSIGN_TYPE_IMM_MEM,
+                OPERATION_ASSIGN_ATTRIBUTE,
+                groupingPath + GroupType.EXCLUDE.value(),
+                uhIdentifier,
+                SELF_OPTED);
+
+        return result;
     }
 
     public GroupingRemoveResults removeFromGroups(String currentUser, String uhIdentifier, List<String> groupPaths) {
