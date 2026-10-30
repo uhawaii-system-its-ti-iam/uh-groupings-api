@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.type;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.hawaii.its.api.wrapper.Subject;
 
@@ -13,12 +14,19 @@ public class UhIdentifierValidationResult {
     private final List<String> validIdentifiers;
     private final List<String> invalidIdentifiers;
     private final List<Subject> validSubjects;
+    private final Map<String, String> subjectSourceIds;
 
     public UhIdentifierValidationResult(List<String> validIdentifiers, List<String> invalidIdentifiers,
             List<Subject> validSubjects) {
+        this(validIdentifiers, invalidIdentifiers, validSubjects, Map.of());
+    }
+
+    public UhIdentifierValidationResult(List<String> validIdentifiers, List<String> invalidIdentifiers,
+            List<Subject> validSubjects, Map<String, String> subjectSourceIds) {
         this.validIdentifiers = validIdentifiers;
         this.invalidIdentifiers = invalidIdentifiers;
         this.validSubjects = validSubjects;
+        this.subjectSourceIds = subjectSourceIds;
     }
 
     public List<String> getValidIdentifiers() {
@@ -36,5 +44,13 @@ public class UhIdentifierValidationResult {
      */
     public List<Subject> getValidSubjects() {
         return validSubjects;
+    }
+
+    /**
+     * The subject source of each valid identifier, so that adding or removing it can look it up in that source
+     * alone (see GrouperCommand.subjectLookup).
+     */
+    public Map<String, String> getSubjectSourceIds() {
+        return subjectSourceIds;
     }
 }

@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.SignatureException;
 
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.InvalidGroupPathException;
@@ -259,6 +261,31 @@ public class ErrorControllerAdvice {
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .message("Direct Owner Removed Exception")
                 .stackTrace(ExceptionUtils.getStackTrace(dore))
+                .resultCode(RESULT_CODE_FAILURE)
+                .path(path);
+
+        ApiError apiError = errorBuilder.build();
+
+        return buildResponseEntity(apiError);
+    }
+
+    // Every JwtException means the caller's token can't be trusted (expired, malformed, wrong signature,
+    // unsupported algorithm), so all of them are 401. 403 stays reserved for an authenticated user who
+    // lacks permission, which the UI treats as lost owner access.
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiError> handleJwtException(JwtException je) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String path = attributes != null ? attributes.getRequest().getRequestURI() : "unknown";
+
+        String message = je instanceof SignatureException
+                ? "SECURITY ALERT: JWT Signature Mismatch"
+                : "JWT Exception";
+
+        logger.error(message + " for path: " + path, je);
+        emailService.sendWithStack(je, message, path);
+        ApiError.Builder errorBuilder = new ApiError.Builder()
+                .status(HttpStatus.UNAUTHORIZED)
+                .message(message)
                 .resultCode(RESULT_CODE_FAILURE)
                 .path(path);
 

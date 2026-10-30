@@ -2,8 +2,11 @@ package edu.hawaii.its.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +35,7 @@ import edu.hawaii.its.api.configuration.GroupingsTestConfiguration;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.groupings.GroupingMoveMembersResult;
 import edu.hawaii.its.api.groupings.MemberAttributeResults;
+import edu.hawaii.its.api.type.AsyncJobProgress;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsGetSubjectsResults;
@@ -83,7 +87,7 @@ public class MemberImportFileTest {
                 ADMIN, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
         SecurityContextHolder.setContext(context);
 
-        given(grouperService.getSubjects(anyList()))
+        given(grouperService.getSubjects(anyList(), any(), any()))
                 .willAnswer(invocation -> subjectsResultsFor(invocation.getArgument(0)));
         given(grouperService.getSubjects(anyString()))
                 .willAnswer(invocation -> subjectsResultsFor(List.of(invocation.<String>getArgument(0))));
@@ -91,9 +95,9 @@ public class MemberImportFileTest {
                 .willReturn(groupingsTestConfiguration.findGroupsResultsDescriptionTestData());
         given(grouperService.hasMemberResults(anyString(), anyString()))
                 .willReturn(groupingsTestConfiguration.hasMemberResultsIsMembersUhuuidTestData());
-        given(grouperService.addMembers(anyString(), anyString(), anyList()))
+        given(grouperService.addMembers(anyString(), anyString(), anyList(), anyMap(), any()))
                 .willReturn(groupingsTestConfiguration.addMemberResultsSuccessTestData());
-        given(grouperService.removeMembers(anyString(), anyString(), anyList()))
+        given(grouperService.removeMembers(anyString(), anyString(), anyList(), anyMap(), any()))
                 .willReturn(groupingsTestConfiguration.deleteMemberResultsSuccessTestData());
     }
 
@@ -119,20 +123,24 @@ public class MemberImportFileTest {
         }
 
         GroupingMoveMembersResult includeResult =
-                updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, valid).join();
+                updateMemberService.addIncludeMembersAsync(ADMIN, GROUPING, valid, new AsyncJobProgress()).join();
         assertEquals("SUCCESS", includeResult.getResultCode());
         assertTrue(includeResult.getInvalidUhIdentifiers().isEmpty());
 
         GroupingMoveMembersResult excludeResult =
-                updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, valid).join();
+                updateMemberService.addExcludeMembersAsync(ADMIN, GROUPING, valid, new AsyncJobProgress()).join();
         assertEquals("SUCCESS", excludeResult.getResultCode());
         assertTrue(excludeResult.getInvalidUhIdentifiers().isEmpty());
 
         // A UH number repeated in the file is only added once.
-        verify(grouperService, times(1)).addMembers(ADMIN, GROUPING + ":include", expectedAdded);
-        verify(grouperService, times(1)).removeMembers(ADMIN, GROUPING + ":exclude", expectedAdded);
-        verify(grouperService, times(1)).addMembers(ADMIN, GROUPING + ":exclude", expectedAdded);
-        verify(grouperService, times(1)).removeMembers(ADMIN, GROUPING + ":include", expectedAdded);
+        verify(grouperService, times(1))
+                .addMembers(eq(ADMIN), eq(GROUPING + ":include"), eq(expectedAdded), anyMap(), any());
+        verify(grouperService, times(1))
+                .removeMembers(eq(ADMIN), eq(GROUPING + ":exclude"), eq(expectedAdded), anyMap(), any());
+        verify(grouperService, times(1))
+                .addMembers(eq(ADMIN), eq(GROUPING + ":exclude"), eq(expectedAdded), anyMap(), any());
+        verify(grouperService, times(1))
+                .removeMembers(eq(ADMIN), eq(GROUPING + ":include"), eq(expectedAdded), anyMap(), any());
     }
 
     /**

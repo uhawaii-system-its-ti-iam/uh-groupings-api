@@ -3,6 +3,7 @@ package edu.hawaii.its.api.configuration;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
@@ -89,7 +90,7 @@ public class SecurityConfigTest {
     public void protectedEndpointRequiresJwtAuthenticationTest() throws Exception {
         MvcResult mvcResult = mockMvc.perform(get(API_BASE_URL + "members/memberships"))
                 .andReturn();
-        assertEquals(403, mvcResult.getResponse().getStatus());
+        assertEquals(401, mvcResult.getResponse().getStatus());
     }
 
     @Test
@@ -97,6 +98,25 @@ public class SecurityConfigTest {
         MvcResult mvcResult = mockMvc.perform(get(API_BASE_URL + "members/memberships")
                         .header("Authorization", "InvalidFormat"))
                 .andReturn();
-        assertEquals(403, mvcResult.getResponse().getStatus());
+        assertEquals(401, mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    public void protectedEndpointWithEmptyJwtBearerTest() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE_URL + "members/memberships")
+                        .header("Authorization", "Bearer "))
+                .andReturn();
+        assertEquals(401, mvcResult.getResponse().getStatus());
+    }
+
+    @Test
+    public void protectedEndpointWithInvalidJwtTest() throws Exception {
+        MvcResult mvcResult = mockMvc.perform(get(API_BASE_URL + "members/memberships")
+                        .header("Authorization", "Bearer not.a.real.token"))
+                .andExpect(jsonPath("$.message").value("JWT Exception"))
+                .andExpect(jsonPath("$.path").value(API_BASE_URL + "members/memberships"))
+                .andExpect(jsonPath("$.stackTrace").doesNotExist())
+                .andReturn();
+        assertEquals(401, mvcResult.getResponse().getStatus());
     }
 }

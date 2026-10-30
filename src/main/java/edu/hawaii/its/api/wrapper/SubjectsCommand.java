@@ -40,8 +40,17 @@ public class SubjectsCommand extends GrouperCommand<SubjectsCommand> implements 
     }
 
     public SubjectsCommand addSubjects(List<String> uhIdentifiers) {
+        return addSubjects(uhIdentifiers, null);
+    }
+
+    /**
+     * Look up the uhIdentifiers in the subject source sourceId only, or in every source when sourceId is null (see
+     * GrouperCommand.subjectLookup). Looked up in one source, each identifier that resolves to nothing is answered
+     * with its own SUBJECT_NOT_FOUND entry.
+     */
+    public SubjectsCommand addSubjects(List<String> uhIdentifiers, String sourceId) {
         for (String uhIdentifier : uhIdentifiers) {
-            gcGetSubjects.addWsSubjectLookup(subjectLookup(uhIdentifier));
+            gcGetSubjects.addWsSubjectLookup(subjectLookup(uhIdentifier, sourceId));
         }
         return this;
     }
