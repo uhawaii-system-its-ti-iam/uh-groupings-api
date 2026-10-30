@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
+import edu.hawaii.its.api.groupings.GroupingOwnerMembers;
 import edu.hawaii.its.api.wrapper.GetMembersResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,13 +64,13 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 public class UpdateMemberServiceTest {
 
     @Autowired
-    private SubjectService subjectService;
-
-    @Autowired
     private UpdateMemberService updateMemberService;
 
     @Autowired
     private GroupingsTestConfiguration groupingsTestConfiguration;
+
+    @MockitoSpyBean
+    private SubjectService subjectService;
 
     @MockitoSpyBean
     private GroupingAssignmentService groupingAssignmentService;
@@ -307,12 +308,21 @@ public class UpdateMemberServiceTest {
         assertNotNull(subjectsResults);
         doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS);
 
-        doReturn(TEST_UIDS.size() + 1).when(groupingAssignmentService)
-                .numberOfDirectOwners(TEST_UIDS.get(0), groupPath);
+        List<String> validIdentifiers = TEST_UIDS;
+        doReturn(validIdentifiers).when(subjectService)
+                .getValidUhUuids(TEST_UIDS.get(0), TEST_UIDS);
 
-        RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsFailureTestData();
+        GroupingOwnerMembers groupingImmediateOwners =
+                new GroupingOwnerMembers(groupingsTestConfiguration.getMembersResultsSuccessTestData().getMembersResults().get(0), 100);
+        assertNotNull(groupingImmediateOwners);
+
+        doReturn(groupingImmediateOwners).when(groupingAssignmentService)
+                .groupingImmediateOwners(TEST_UIDS.get(0), groupPath);
+
+        RemoveMembersResults removeMembersResults =
+                groupingsTestConfiguration.deleteMemberResultsFailureTestData();
         assertNotNull(removeMembersResults);
-        List<String> validIdentifiers = subjectService.getValidUhUuids(ADMIN, TEST_UIDS);
+
         doReturn(removeMembersResults).when(grouperService)
                 .removeMembers(TEST_UIDS.get(0), groupPath + GroupType.OWNERS.value(), validIdentifiers);
 
