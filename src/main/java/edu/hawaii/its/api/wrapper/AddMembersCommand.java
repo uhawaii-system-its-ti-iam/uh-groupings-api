@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.wrapper;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.internet2.middleware.grouperClient.api.GcAddMember;
 import edu.internet2.middleware.grouperClient.ws.beans.WsAddMemberResults;
@@ -48,6 +49,17 @@ public class AddMembersCommand extends GrouperCommand<AddMembersCommand> impleme
     public AddMembersCommand addUhIdentifiers(List<String> uhIdentifiers) {
         for (String uhIdentifier : uhIdentifiers) {
             addUhIdentifier(uhIdentifier);
+        }
+        return this;
+    }
+
+    /**
+     * Add the uhIdentifiers, each looked up only in its subject source in sourceIds, or in every source when it has
+     * none there (see GrouperCommand.subjectLookup).
+     */
+    public AddMembersCommand addUhIdentifiers(List<String> uhIdentifiers, Map<String, String> sourceIds) {
+        for (String uhIdentifier : uhIdentifiers) {
+            gcAddMember.addSubjectLookup(subjectLookup(uhIdentifier, sourceIds.get(uhIdentifier)));
         }
         return this;
     }

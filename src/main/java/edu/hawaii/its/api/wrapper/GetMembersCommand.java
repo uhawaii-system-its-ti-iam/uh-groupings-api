@@ -77,4 +77,9 @@ public class GetMembersCommand extends GrouperCommand<GetMembersCommand> impleme
         gcGetMembers.assignMemberFilter(memberFilter.value());
         return this;
     }
+
+    public GetMembersCommand includeSubjectDetail(boolean includeSubjectDetail) {
+        gcGetMembers.assignIncludeSubjectDetail(includeSubjectDetail);
+        return this;
+    }
 }
