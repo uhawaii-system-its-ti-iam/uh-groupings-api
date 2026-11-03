@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -32,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -814,4 +816,36 @@ public class GroupingOwnerServiceTest {
 		assertNotNull(groupingMembers);
 		assertTrue(groupingMembers.getMembers().isEmpty());
 	}
+    @Test
+    public void sendSyncDestinationErrorEmailTest() {
+        RequestContextHolder.resetRequestAttributes();
+        doNothing().when(emailService).sendWithStack(any(), any(), any());
+        assertDoesNotThrow(() -> ReflectionTestUtils.invokeMethod(
+                groupingOwnerService, "sendSyncDestinationErrorEmail", new RuntimeException("test")));
+    }
+    @Test
+    public void getGroupPathTest() {
+        GroupAttributeResults results = mock(GroupAttributeResults.class);
+
+        when(results.getGroups()).thenReturn(null);
+        assertEquals("a:b:c",
+                ReflectionTestUtils.invokeMethod(groupingOwnerService, "getGroupPath", results, "a:b:c"));
+
+        when(results.getGroups()).thenReturn(new ArrayList<>());
+        assertEquals("a:b:c",
+                ReflectionTestUtils.invokeMethod(groupingOwnerService, "getGroupPath", results, "a:b:c"));
+    }
+
+    @Test
+    public void getGroupNameTest() {
+        GroupAttributeResults results = mock(GroupAttributeResults.class);
+
+        when(results.getGroups()).thenReturn(null);
+        assertEquals("c",
+                ReflectionTestUtils.invokeMethod(groupingOwnerService, "getGroupName", results, "a:b:c"));
+
+        when(results.getGroups()).thenReturn(new ArrayList<>());
+        assertEquals("",
+                ReflectionTestUtils.invokeMethod(groupingOwnerService, "getGroupName", results, ""));
+    }
 }

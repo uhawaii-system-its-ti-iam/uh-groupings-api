@@ -326,6 +326,10 @@ public class GroupingOwnerService {
     private String getGroupPath(
             GroupAttributeResults groupAttributeResults,
             String groupingPath) {
+        if (groupAttributeResults == null || groupAttributeResults.getGroups() == null
+                || groupAttributeResults.getGroups().isEmpty()) {
+            return groupingPath != null ? groupingPath : "";
+        }
         return groupAttributeResults.getGroups().stream()
                 .findFirst()
                 .map(Group::getGroupPath)
@@ -338,6 +342,14 @@ public class GroupingOwnerService {
     private String getGroupName(
             GroupAttributeResults groupAttributeResults,
             String groupPath) {
+        if (groupAttributeResults == null || groupAttributeResults.getGroups() == null
+                || groupAttributeResults.getGroups().isEmpty()) {
+            if (groupPath == null || groupPath.isBlank()) {
+                return "";
+            }
+            int lastColon = groupPath.lastIndexOf(':');
+            return lastColon >= 0 ? groupPath.substring(lastColon + 1) : groupPath;
+        }
         return groupAttributeResults.getGroups().stream()
                 .findFirst()
                 .map(Group::getExtension)
@@ -503,7 +515,7 @@ public class GroupingOwnerService {
         try {
             ServletRequestAttributes attributes =
                     (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            String path = attributes != null
+            String path = (attributes != null && attributes.getRequest() != null)
                     ? attributes.getRequest().getRequestURI()
                     : "unknown";
             emailService.sendWithStack(e, "Sync Destination Error", path);
