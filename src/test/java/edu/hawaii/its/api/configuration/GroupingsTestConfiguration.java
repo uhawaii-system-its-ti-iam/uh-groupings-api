@@ -331,6 +331,11 @@ public class GroupingsTestConfiguration {
         return new GetMembersResults(wsGetMembersResults);
     }
 
+    public GetMembersResults getMembersResultsSuccessOwnerGroupingTestData() {
+        WsGetMembersResults wsGetMembersResults =
+                getWsResultTestData("ws.get.members.results.success.owner-grouping", WsGetMembersResults.class);
+        return new GetMembersResults(wsGetMembersResults); }
+
     public GroupingSyncDestination attributeDescriptionTestData() {
         return getWsResultTestData("ws.attribute.description", GroupingSyncDestination.class);
     }
