@@ -8,8 +8,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +30,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.type.Feedback;
+import edu.hawaii.its.api.type.RetireGroupingResult;
 
 @ActiveProfiles("localTest")
 @SpringBootTest(classes = { SpringBootWebApplication.class })
@@ -34,6 +39,8 @@ public class EmailServiceTest {
     private static boolean wasSent;
 
     private static SimpleMailMessage messageSent;
+
+    private static List<SimpleMailMessage> messagesSent;
 
     private static Feedback feedback;
 
@@ -60,17 +67,19 @@ public class EmailServiceTest {
         doReturn(true).when(subjectService).isValidIdentifier(TEST_UIDS.get(0), TEST_UIDS.get(0));
 
         doAnswer(invocation -> {
+            SimpleMailMessage mailMessage = invocation.getArgument(0);
             wasSent = true;
-            messageSent = invocation.getArgument(0);
+            messageSent = mailMessage;
+            messagesSent.add(mailMessage);
             return null;
         }).when(javaMailSender).send(any(SimpleMailMessage.class));
-
         emailService.setEnabled(true);
         emailService.setRecipient("address");
         emailService.setEnvironment(environment);
 
 
         wasSent = false;
+        messagesSent = new ArrayList<>();
         
 
         feedback = new Feedback();
@@ -100,6 +109,12 @@ public class EmailServiceTest {
         assertFalse(wasSent);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertFalse(wasSent);
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails("path:to:grouping", "owner@hawaii.edu",
+                "grouping", "description", List.of("other-owner@hawaii.edu"), "Owner Name");
+        assertFalse(wasSent);
+        assertEquals("FAILURE", result.getResultCode());
+        assertEquals("Email service is not enabled.", result.getResultMessage());
+        assertEquals(List.of("other-owner@hawaii.edu"), result.getOwnerRecipients());
     }
 
     @Test
@@ -178,5 +193,82 @@ public class EmailServiceTest {
         assertEquals("dev", environment);
         emailService.sendWithStack(new NullPointerException(), "Null Pointer Exception", testPath);
         assertTrue(messageSent.getSubject().contains("(dev)"));
+    }
+
+    @Test
+    public void sendRetireGroupingEmails() {
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails(
+                "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
+                "requestor@hawaii.edu",
+                "JTTEST-L",
+                "Changing description test",
+                List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                "Requestor Name");
+
+        assertEquals(2, messagesSent.size());
+        assertEquals("SUCCESS", result.getResultCode());
+        assertEquals("Retirement request emails were sent.", result.getResultMessage());
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
+
+        SimpleMailMessage iamMessage = messagesSent.get(0);
+        assertTrue(Arrays.asList(iamMessage.getTo()).contains("iam-team-test@hawaii.edu"));
+        assertEquals("[groupings] Owner request to retire JTTEST-L", iamMessage.getSubject());
+        assertTrue(iamMessage.getText().contains("Grouping to retire: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
+        assertTrue(iamMessage.getText().contains("Requesting by owner: requestor@hawaii.edu"));
+        assertTrue(iamMessage.getText().contains("LISTSERV lists or Google groups"));
+        assertTrue(iamMessage.getText().contains("An owners notification will be sent"));
+
+        SimpleMailMessage ownersMessage = messagesSent.get(1);
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                Arrays.asList(ownersMessage.getTo()));
+        assertEquals("Request sent to IAM to retire grouping JTTEST-L", ownersMessage.getSubject());
+        assertTrue(ownersMessage.getText().contains("request from Requestor Name"));
+        assertTrue(ownersMessage.getText().contains("  o Name: JTTEST-L - Changing description test"));
+        assertTrue(ownersMessage.getText().contains("  o Path: hawaii.edu:custom:test:listserv-tests:JTTEST-L"));
+        assertTrue(ownersMessage.getText().contains("<its-iam-help@lists.hawaii.edu>"));
+    }
+
+    @Test
+    public void sendRetireGroupingEmailsOwnerFailure() {
+        doAnswer(invocation -> {
+            SimpleMailMessage mailMessage = invocation.getArgument(0);
+            if (mailMessage.getTo().length > 1) {
+                throw new MailSendException("Owners notification rejected");
+            }
+            messagesSent.add(mailMessage);
+            return null;
+        }).when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails(
+                "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
+                "requestor@hawaii.edu",
+                "JTTEST-L",
+                "Changing description test",
+                List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                "Requestor Name");
+
+        assertEquals("FAILURE", result.getResultCode());
+        assertEquals("Failed to send the grouping owners notification email.", result.getResultMessage());
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
+        assertEquals(1, messagesSent.size());
+    }
+
+    @Test
+    public void sendRetireGroupingEmailsIamFailureDoesNotNotifyOwners() {
+        doThrow(new MailSendException("IAM recipient rejected"))
+                .when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        RetireGroupingResult result = emailService.sendRetireGroupingEmails(
+                "hawaii.edu:custom:test:listserv-tests:JTTEST-L",
+                "requestor@hawaii.edu",
+                "JTTEST-L",
+                "Changing description test",
+                List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
+                "Requestor Name");
+
+        assertEquals("FAILURE", result.getResultCode());
+        assertEquals("Failed to send the IAM retirement request email.", result.getResultMessage());
+        assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
+        verify(javaMailSender, times(1)).send(any(SimpleMailMessage.class));
     }
 }
