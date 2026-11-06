@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,12 @@ public class TestGroupingOwnerService {
 
     @Value("${groupings.api.test.uh-uuids}")
     private List<String> TEST_UH_UUIDS;
+
+    @Value("${groupings.api.releasedgrouping}")
+    private String RELEASED_GROUPING;
+
+    @Value("${grouper.api.sync.destinations.location}")
+    private String SYNC_DESTINATIONS_LOCATION;
 
     @Autowired
     private GroupingOwnerService ownerService;
@@ -209,10 +216,20 @@ public class TestGroupingOwnerService {
                         .sorted(Comparator.comparing(GroupingSyncDestination::getDescription))
                         .collect(Collectors.toList()));
 
-        assertTrue(groupingSyncDestinations.getSyncDestinations().stream()
-                .filter(syncDestination -> !syncDestination.getDescription().contains("uhReleasedGrouping"))
-                .filter(syncDestination -> !syncDestination.getDescription().equals("Entra: entraGroupings"))
-                .allMatch(e -> e.getDescription().contains(new Grouping(GROUPING).getName())));
+        // These destinations sync to an attribute shared by all groupings, not to a group made for
+        // each grouping, so their descriptions are fixed and don't contain the grouping name.
+        Map<String, String> fixedDescriptions = Map.of(
+                RELEASED_GROUPING, "CAS/LDAP: uhReleasedGrouping",
+                SYNC_DESTINATIONS_LOCATION + ":entra-groupings", "Entra: entraGroupings");
+        String groupingName = new Grouping(GROUPING).getName();
+        for (GroupingSyncDestination syncDestination : groupingSyncDestinations.getSyncDestinations()) {
+            String name = syncDestination.getName();
+            if (fixedDescriptions.containsKey(name)) {
+                assertEquals(fixedDescriptions.get(name), syncDestination.getDescription(), name);
+            } else {
+                assertTrue(syncDestination.getDescription().contains(groupingName), name);
+            }
+        }
     }
 
 }
