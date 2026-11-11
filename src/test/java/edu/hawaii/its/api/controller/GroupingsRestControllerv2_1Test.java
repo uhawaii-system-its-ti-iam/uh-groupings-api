@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -27,6 +28,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -72,6 +74,7 @@ import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
+import edu.hawaii.its.api.type.AsyncJobProgress;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
 import edu.hawaii.its.api.type.GroupingPath;
@@ -588,15 +591,18 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
         CompletableFuture<GroupingMoveMembersResult> completableFuture = new CompletableFuture<>();
-        given(updateMemberService.addIncludeMembersAsync(TEST_USER, "grouping", usersToAdd))
-                .willReturn(completableFuture);
+        given(updateMemberService.addIncludeMembersAsync(eq(TEST_USER), eq("grouping"), eq(usersToAdd),
+                any(AsyncJobProgress.class))).willReturn(completableFuture);
         mockMvc.perform(put(API_BASE + "/groupings/grouping/include-members/async")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToAdd)))
                 .andExpect(status().isAccepted());
 
+        // The job is put with the progress object the import reports to, so polling it returns the progress.
+        ArgumentCaptor<AsyncJobProgress> progress = ArgumentCaptor.forClass(AsyncJobProgress.class);
         verify(updateMemberService, times(1))
-                .addIncludeMembersAsync(TEST_USER, "grouping", usersToAdd);
+                .addIncludeMembersAsync(eq(TEST_USER), eq("grouping"), eq(usersToAdd), progress.capture());
+        verify(asyncJobsManager, times(1)).putJob(completableFuture, progress.getValue());
     }
 
     @Test
@@ -627,15 +633,18 @@ public class GroupingsRestControllerv2_1Test {
         usersToAdd.add("tst05name");
         usersToAdd.add("tst06name");
         CompletableFuture<GroupingMoveMembersResult> completableFuture = new CompletableFuture<>();
-        given(updateMemberService.addExcludeMembersAsync(TEST_USER, "grouping", usersToAdd))
-                .willReturn(completableFuture);
+        given(updateMemberService.addExcludeMembersAsync(eq(TEST_USER), eq("grouping"), eq(usersToAdd),
+                any(AsyncJobProgress.class))).willReturn(completableFuture);
         mockMvc.perform(put(API_BASE + "/groupings/grouping/exclude-members/async")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JsonUtil.asJson(usersToAdd)))
                 .andExpect(status().isAccepted());
 
+        // The job is put with the progress object the import reports to, so polling it returns the progress.
+        ArgumentCaptor<AsyncJobProgress> progress = ArgumentCaptor.forClass(AsyncJobProgress.class);
         verify(updateMemberService, times(1))
-                .addExcludeMembersAsync(TEST_USER, "grouping", usersToAdd);
+                .addExcludeMembersAsync(eq(TEST_USER), eq("grouping"), eq(usersToAdd), progress.capture());
+        verify(asyncJobsManager, times(1)).putJob(completableFuture, progress.getValue());
     }
 
     @Test

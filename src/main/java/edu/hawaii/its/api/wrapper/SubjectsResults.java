@@ -1,7 +1,9 @@
 package edu.hawaii.its.api.wrapper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import edu.hawaii.its.api.type.GroupType;
 
@@ -30,6 +32,33 @@ public class SubjectsResults extends Results {
 
     public SubjectsResults() {
         this.wsGetSubjectsResults = new WsGetSubjectsResults();
+    }
+
+    /**
+     * Merge the results of a lookup that was sent to Grouper in batches into one result, in batch order, as if the
+     * lookup had been sent in a single request. Each batch collapses its own unresolved lookups into one
+     * SUBJECT_NOT_FOUND entry, so the merged result can hold one such entry per batch.
+     */
+    public static SubjectsResults merge(List<SubjectsResults> batchResults) {
+        if (batchResults.isEmpty()) {
+            return new SubjectsResults();
+        }
+        if (batchResults.size() == 1) {
+            return batchResults.get(0);
+        }
+        List<WsGetSubjectsResults> batches =
+                batchResults.stream().map(results -> results.wsGetSubjectsResults).toList();
+        WsGetSubjectsResults merged = new WsGetSubjectsResults();
+        merged.setWsSubjects(batches.stream()
+                .map(WsGetSubjectsResults::getWsSubjects)
+                .filter(Objects::nonNull)
+                .flatMap(Arrays::stream)
+                .toArray(WsSubject[]::new));
+        merged.setWsGroup(batches.get(0).getWsGroup());
+        merged.setSubjectAttributeNames(batches.get(0).getSubjectAttributeNames());
+        merged.setResultMetadata(
+                mergedResultMetadata(batches.stream().map(WsGetSubjectsResults::getResultMetadata).toList()));
+        return new SubjectsResults(merged);
     }
 
     public Group getGroup() {

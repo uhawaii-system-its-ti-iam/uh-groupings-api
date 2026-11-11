@@ -5,8 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -20,7 +23,9 @@ import java.util.concurrent.CompletionException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -46,6 +51,25 @@ public class MemberAttributeServiceTest {
 
     @MockitoBean
     private GrouperService grouperService;
+
+    @Value("${groupings.api.grouper.person-source-id}")
+    private String PERSON_SOURCE_ID;
+
+    /**
+     * Stubs the bulk lookup of identifiers in the subject source of UH people, which validation makes first. The
+     * identifiers it leaves unresolved are looked up again in every source, where none of them is found either.
+     */
+    private BDDMockito.BDDMyOngoingStubbing<SubjectsResults> givenLookup(List<String> identifiers) {
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode("SUCCESS");
+        WsSubject notFound = new WsSubject();
+        notFound.setResultCode("SUBJECT_NOT_FOUND");
+        WsGetSubjectsResults nothingFound = new WsGetSubjectsResults();
+        nothingFound.setResultMetadata(resultMetadata);
+        nothingFound.setWsSubjects(new WsSubject[] { notFound });
+        given(grouperService.getSubjects(anyList(), isNull(), any())).willReturn(new SubjectsResults(nothingFound));
+        return given(grouperService.getSubjects(eq(identifiers), eq(PERSON_SOURCE_ID), any()));
+    }
 
     @Autowired
     private MemberAttributeService memberAttributeService;
@@ -106,7 +130,7 @@ public class MemberAttributeServiceTest {
     public void getMemberAttributeResultsReportsMalformedAndUnknownIdentifiersAsInvalid() {
         List<String> identifiers = List.of("12-345-678", "00000001", "99999999999", "!!!!!!!!");
         List<String> wellFormed = List.of("00000001", "99999999999");
-        given(grouperService.getSubjects(wellFormed))
+        givenLookup(wellFormed)
                 .willReturn(subjectsResultsInOrder(wellFormed, List.of("SUCCESS", "SUBJECT_NOT_FOUND")));
 
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(TEST_USER, identifiers);
@@ -115,7 +139,7 @@ public class MemberAttributeServiceTest {
         assertTrue(results.getResults().isEmpty());
         assertEquals("FAILURE", results.getResultCode());
         // One bulk lookup for the whole list, not one Grouper call per identifier.
-        verify(grouperService, times(1)).getSubjects(anyList());
+        verify(grouperService, times(1)).getSubjects(anyList(), eq(PERSON_SOURCE_ID), any());
         verify(grouperService, never()).getSubjects(anyString());
     }
 
@@ -123,7 +147,7 @@ public class MemberAttributeServiceTest {
     public void getMemberAttributeResultsAsyncReportsMalformedAndUnknownIdentifiersAsInvalid() {
         List<String> identifiers = List.of("12-345-678", "00000001", "99999999999", "!!!!!!!!");
         List<String> wellFormed = List.of("00000001", "99999999999");
-        given(grouperService.getSubjects(wellFormed))
+        givenLookup(wellFormed)
                 .willReturn(subjectsResultsInOrder(wellFormed, List.of("SUCCESS", "SUBJECT_NOT_FOUND")));
 
         MemberAttributeResults results =
@@ -131,7 +155,7 @@ public class MemberAttributeServiceTest {
 
         assertEquals(List.of("12-345-678", "99999999999", "!!!!!!!!"), results.getInvalid());
         assertTrue(results.getResults().isEmpty());
-        verify(grouperService, times(1)).getSubjects(anyList());
+        verify(grouperService, times(1)).getSubjects(anyList(), eq(PERSON_SOURCE_ID), any());
         verify(grouperService, never()).getSubjects(anyString());
     }
 
@@ -151,7 +175,7 @@ public class MemberAttributeServiceTest {
     public void getMemberAttributeResultsReportsARepeatedInvalidIdentifierOnce() {
         List<String> identifiers = List.of("1234", "00000001", "1234", "00000001");
         List<String> unique = List.of("1234", "00000001");
-        given(grouperService.getSubjects(unique))
+        givenLookup(unique)
                 .willReturn(subjectsResultsInOrder(unique, List.of("SUBJECT_NOT_FOUND", "SUCCESS")));
 
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(TEST_USER, identifiers);
@@ -176,7 +200,7 @@ public class MemberAttributeServiceTest {
         WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
         wsGetSubjectsResults.setResultMetadata(resultMetadata);
         wsGetSubjectsResults.setWsSubjects(new WsSubject[] { found, notFound });
-        given(grouperService.getSubjects(identifiers)).willReturn(new SubjectsResults(wsGetSubjectsResults));
+        givenLookup(identifiers).willReturn(new SubjectsResults(wsGetSubjectsResults));
 
         MemberAttributeResults results =
                 memberAttributeService.getMemberAttributeResultsAsync(TEST_USER, identifiers).join();
@@ -189,7 +213,7 @@ public class MemberAttributeServiceTest {
     @Test
     public void getMemberAttributeResultsReturnsAttributesWhenEveryIdentifierIsValid() {
         List<String> identifiers = List.of("00000001", "00000002");
-        given(grouperService.getSubjects(identifiers))
+        givenLookup(identifiers)
                 .willReturn(subjectsResultsInOrder(identifiers, List.of("SUCCESS", "SUCCESS")));
 
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(TEST_USER, identifiers);
@@ -203,7 +227,7 @@ public class MemberAttributeServiceTest {
     public void getMemberAttributeResultsAllowsOwnerWhoIsNotAdmin() {
         setRoles("ROLE_OWNER");
         List<String> identifiers = List.of("00000001");
-        given(grouperService.getSubjects(identifiers))
+        givenLookup(identifiers)
                 .willReturn(subjectsResultsInOrder(identifiers, List.of("SUCCESS")));
 
         MemberAttributeResults results = memberAttributeService.getMemberAttributeResults(TEST_USER, identifiers);

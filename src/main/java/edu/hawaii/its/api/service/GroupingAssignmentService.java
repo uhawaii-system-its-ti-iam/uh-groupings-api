@@ -133,9 +133,11 @@ public class GroupingAssignmentService {
      * Returns the number of directly assigned owner entries in a grouping.
      * Includes individual user owners and owner-groupings.
      */
-    public Integer numberOfDirectOwnerEntries(String currentUser, String groupPath, String uhIdentifier) {
-        logger.debug(String.format("numberOfDirectOwnerEntries; currentUser: %s; groupPath: %s; uidToCheck: %s;",
-                currentUser, groupPath, uhIdentifier));
+
+    public Integer numberOfDirectOwnerEntries(String currentUser, String groupPath) {
+        logger.debug(String.format("numberOfDirectOwnerEntries; currentUser: %s; groupPath: %s;",
+            currentUser, groupPath));
+      
         if (!memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }

@@ -9,8 +9,10 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.io.DecodingException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.WeakKeyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +92,12 @@ public class JwtServiceTest {
         assertThrows(MalformedJwtException.class, () -> {
             jwtService.extractUsername(malformedToken);
         });
+    }
+
+    @Test
+    public void invalidSecretKeyFailsAtConstructionTest() {
+        assertThrows(DecodingException.class, () -> new JwtService("not*base64!"));
+        assertThrows(WeakKeyException.class, () -> new JwtService("c2hvcnQ="));
     }
 
     // #######################################################

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class AsyncJobResultTest {
 
     private AsyncJobResult asyncJobResult;
@@ -71,5 +73,32 @@ public class AsyncJobResultTest {
     public void setResultTest() {
         asyncJobResult.setResult("result");
         assertEquals("result", asyncJobResult.getResult());
+    }
+
+    @Test
+    public void progressSurvivesAJsonRoundTrip() throws Exception {
+        AsyncJobProgress progress = new AsyncJobProgress();
+        progress.start(AsyncJobProgress.Phase.ADDING, 12284);
+        progress.addDone(250);
+        AsyncJobResult inProgress = new AsyncJobResult(id, status);
+        inProgress.setProgress(progress.snapshot());
+
+        ObjectMapper mapper = new ObjectMapper();
+        AsyncJobResult read = mapper.readValue(mapper.writeValueAsString(inProgress), AsyncJobResult.class);
+
+        assertEquals(status, read.getStatus());
+        assertEquals(AsyncJobProgress.Phase.ADDING, read.getProgress().getPhase());
+        assertEquals(250, read.getProgress().getDone());
+        assertEquals(12284, read.getProgress().getTotal());
+    }
+
+    @Test
+    public void absentProgressSurvivesAJsonRoundTrip() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        AsyncJobResult read = mapper.readValue(mapper.writeValueAsString(new AsyncJobResult(id, "COMPLETED")),
+                AsyncJobResult.class);
+
+        assertEquals("COMPLETED", read.getStatus());
+        assertNull(read.getProgress());
     }
 }

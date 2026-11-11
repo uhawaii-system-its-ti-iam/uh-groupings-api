@@ -44,7 +44,7 @@ public class ExecutorService {
 
             if (!retry || i == MAX_RETRIES) {
                 if (ex != null) {
-                    throw new GrouperException("GrouperClient execution failed: %s" + command.getClass().getSimpleName(), ex);
+                    throw new GrouperException("GrouperClient execution failed: " + command.getClass().getSimpleName(), ex);
                 }
                 break;
             }

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import edu.hawaii.its.api.exception.GrouperException;
 import edu.hawaii.its.api.exception.InvalidUhIdentifierException;
+import edu.hawaii.its.api.type.AsyncJobProgress;
 import edu.hawaii.its.api.type.UhIdentifierValidationResult;
 import edu.hawaii.its.api.wrapper.Subject;
 import edu.hawaii.its.api.wrapper.SubjectsResults;
@@ -43,6 +44,9 @@ public class SubjectService {
 
     @Value("${groupings.api.validation.uh-identifier.regex}")
     private String IDENTIFIER_REGEX;
+
+    @Value("${groupings.api.grouper.person-source-id:}")
+    private String PERSON_SOURCE_ID;
 
     private static Pattern IDENTIFIER_PATTERN;
 
@@ -95,12 +99,21 @@ public class SubjectService {
     }
 
     /**
-     * Partition uhIdentifiers, in a single bulk Grouper lookup, into those that resolve to a valid Grouper
+     * Partition uhIdentifiers, with bulk Grouper lookups, into those that resolve to a valid Grouper
      * subject and those that don't (malformed, or unknown to Grouper). Unlike getValidUhUuids, no identifier
      * is silently dropped: every invalid identifier is reported back, in full, in the order submitted (e.g. the
      * row order of an imported file), for the caller to display.
      */
     public UhIdentifierValidationResult validateUhIdentifiers(String currentUser, List<String> uhIdentifiers) {
+        return validateUhIdentifiers(currentUser, uhIdentifiers, new AsyncJobProgress());
+    }
+
+    /**
+     * Like validateUhIdentifiers(currentUser, uhIdentifiers), reporting how many identifiers have been looked up as
+     * the VALIDATING phase of progress.
+     */
+    public UhIdentifierValidationResult validateUhIdentifiers(String currentUser, List<String> uhIdentifiers,
+            AsyncJobProgress progress) {
         List<String> uniqueIdentifiers = uhIdentifiers.stream().distinct().toList();
         List<String> wellFormed = uniqueIdentifiers.stream().filter(this::isWellFormedIdentifier).toList();
 
@@ -108,10 +121,12 @@ public class SubjectService {
             logger.warn(String.format("Malformed path input rejected from currentUser: %s;", currentUser));
         }
 
-        Map<String, Subject> resolved = wellFormed.isEmpty() ? Map.of() : resolveSubjects(wellFormed);
+        progress.start(AsyncJobProgress.Phase.VALIDATING, wellFormed.size());
+        Map<String, Subject> resolved = wellFormed.isEmpty() ? Map.of() : resolveSubjects(wellFormed, progress);
 
         Set<String> validIdentifiers = new LinkedHashSet<>();
         Set<Subject> validSubjects = new LinkedHashSet<>();
+        Map<String, String> subjectSourceIds = new HashMap<>();
         List<String> invalidIdentifiers = new ArrayList<>();
         for (String uhIdentifier : uniqueIdentifiers) {
             Subject subject = resolved.get(uhIdentifier);
@@ -122,25 +137,59 @@ public class SubjectService {
             // A resolved subject is not guaranteed to carry a uhUuid (e.g. subjects sourced outside the standard
             // UH identifier system), in which case the submitted identifier is what gets used.
             String uhUuid = subject.getUhUuid();
-            validIdentifiers.add(uhUuid.isEmpty() ? uhIdentifier : uhUuid);
+            String validIdentifier = uhUuid.isEmpty() ? uhIdentifier : uhUuid;
+            validIdentifiers.add(validIdentifier);
+            if (!subject.getSourceId().isEmpty()) {
+                subjectSourceIds.put(validIdentifier, subject.getSourceId());
+            }
             // Subject.equals() is by name/uid/uhUuid, so the same subject resolved from two submitted identifiers
             // (e.g. both a uid and its UH number) collapses to one entry here too.
             validSubjects.add(subject);
         }
-        return new UhIdentifierValidationResult(
-                new ArrayList<>(validIdentifiers), invalidIdentifiers, new ArrayList<>(validSubjects));
+        return new UhIdentifierValidationResult(new ArrayList<>(validIdentifiers), invalidIdentifiers,
+                new ArrayList<>(validSubjects), subjectSourceIds);
     }
 
     /**
-     * Look up well-formed identifiers in one bulk Grouper call and return the subject each resolved identifier
-     * belongs to; identifiers Grouper doesn't know are absent from the map.
+     * Look up well-formed identifiers in bulk and return the subject each resolved identifier belongs to;
+     * identifiers Grouper doesn't know are absent from the map.
      * <p>
-     * Grouper does not answer with one entry per lookup: lookups that resolve to nothing are collapsed into a
-     * single SUBJECT_NOT_FOUND entry, and lookups that resolve to the same subject can be too. The results are
-     * therefore matched to the submitted identifiers by the uhUuid and uid they carry, never by position or count.
+     * The identifiers are first looked up in the subject source of UH people (PERSON_SOURCE_ID) alone, which is
+     * several times faster than in every source. The few that don't resolve there (usually unknown identifiers) are
+     * looked up again in every source, so a member from another source is still found.
+     * <p>
+     * Every lookup counts towards progress. A lookup that looks identifiers up again adds them to the phase's total
+     * before it starts, so progress keeps counting up to its total, instead of standing at its total while the
+     * lookup runs.
      */
-    private Map<String, Subject> resolveSubjects(List<String> uhIdentifiers) {
-        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifiers);
+    private Map<String, Subject> resolveSubjects(List<String> uhIdentifiers, AsyncJobProgress progress) {
+        if (PERSON_SOURCE_ID.isEmpty()) {
+            return resolveSubjects(uhIdentifiers, null, progress, true);
+        }
+        Map<String, Subject> resolved = resolveSubjects(uhIdentifiers, PERSON_SOURCE_ID, progress, false);
+        List<String> unresolved = uhIdentifiers.stream()
+                .filter(uhIdentifier -> !resolved.containsKey(uhIdentifier))
+                .toList();
+        if (!unresolved.isEmpty()) {
+            progress.addTotal(unresolved.size());
+            resolved.putAll(resolveSubjects(unresolved, null, progress, true));
+        }
+        return resolved;
+    }
+
+    /**
+     * Look up well-formed identifiers, in the subject source sourceId or, when it is null, in every source, and return
+     * the subject each resolved identifier belongs to. Each identifier looked up counts as done in progress.
+     * <p>
+     * A lookup in every source does not answer with one entry per identifier: lookups that resolve to nothing are
+     * collapsed into a single SUBJECT_NOT_FOUND entry, and lookups that resolve to the same subject can be too. The
+     * results are therefore matched to the submitted identifiers by the uhUuid and uid they carry, never by position
+     * or count. When verifyLeftovers is set, an identifier left unmatched while a found subject matched none of the
+     * identifiers is looked up again on its own.
+     */
+    private Map<String, Subject> resolveSubjects(List<String> uhIdentifiers, String sourceId,
+            AsyncJobProgress progress, boolean verifyLeftovers) {
+        SubjectsResults subjectsResults = grouperService.getSubjects(uhIdentifiers, sourceId, progress::addDone);
         if (!subjectsResults.isSuccessful()) {
             throw new GrouperException(
                     "Grouper subject lookup failed (rawResultCode=" + subjectsResults.getRawResultCode() + ")");
@@ -170,14 +219,17 @@ public class SubjectService {
         // A subject Grouper resolved but that answers to none of the submitted identifiers means one of them was
         // resolved under a form not recognised above. Verify the leftovers one at a time (a single lookup always
         // returns exactly one entry) rather than report a real member as not found.
-        if (matched.size() < found.size()) {
-            for (String uhIdentifier : uhIdentifiers) {
-                if (!resolved.containsKey(uhIdentifier)) {
-                    Subject subject = getSubject(uhIdentifier);
-                    if (isValidSubject(subject)) {
-                        resolved.put(uhIdentifier, subject);
-                    }
+        if (verifyLeftovers && matched.size() < found.size()) {
+            List<String> leftovers = uhIdentifiers.stream()
+                    .filter(uhIdentifier -> !resolved.containsKey(uhIdentifier))
+                    .toList();
+            progress.addTotal(leftovers.size());
+            for (String uhIdentifier : leftovers) {
+                Subject subject = getSubject(uhIdentifier);
+                if (isValidSubject(subject)) {
+                    resolved.put(uhIdentifier, subject);
                 }
+                progress.addDone(1);
             }
         }
         return resolved;

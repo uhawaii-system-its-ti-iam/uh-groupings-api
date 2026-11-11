@@ -1,7 +1,10 @@
 package edu.hawaii.its.api.wrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -149,4 +152,63 @@ public class SubjectsResultsTest {
         assertEquals(0, subjectsResults.getUnfilteredSubjects().size());
     }
 
+    @Test
+    public void mergeOfOneBatchIsThatBatch() {
+        SubjectsResults batch = groupingsTestConfiguration.getSubjectsResultsSuccessTestData();
+        assertSame(batch, SubjectsResults.merge(List.of(batch)));
+    }
+
+    @Test
+    public void mergeOfNoBatchesIsEmpty() {
+        assertTrue(SubjectsResults.merge(List.of()).getUnfilteredSubjects().isEmpty());
+    }
+
+    @Test
+    public void mergeCombinesTheBatchesInOrder() {
+        // Like real Grouper, each batch collapses its unresolved lookups into one SUBJECT_NOT_FOUND entry.
+        SubjectsResults merged = SubjectsResults.merge(List.of(
+                batch(SUCCESS, found("00000001"), notFound()),
+                batch(SUCCESS, notFound(), found("00000002"))));
+
+        assertTrue(merged.isSuccessful());
+        assertEquals(List.of(SUCCESS, SUBJECT_NOT_FOUND, SUBJECT_NOT_FOUND, SUCCESS),
+                merged.getUnfilteredSubjects().stream().map(Subject::getResultCode).toList());
+        assertEquals(List.of("00000001", "", "", "00000002"),
+                merged.getUnfilteredSubjects().stream().map(Subject::getUhUuid).toList());
+    }
+
+    @Test
+    public void mergeIsUnsuccessfulWhenABatchIs() {
+        SubjectsResults merged = SubjectsResults.merge(List.of(
+                batch(SUCCESS, found("00000001")),
+                batch("FAILURE", notFound()),
+                batch(SUCCESS, found("00000002"))));
+
+        assertFalse(merged.isSuccessful());
+        assertEquals("FAILURE", merged.getRawResultCode());
+        assertEquals(3, merged.getUnfilteredSubjects().size());
+    }
+
+    private SubjectsResults batch(String rawResultCode, WsSubject... wsSubjects) {
+        WsResultMeta resultMetadata = new WsResultMeta();
+        resultMetadata.setResultCode(rawResultCode);
+        WsGetSubjectsResults wsGetSubjectsResults = new WsGetSubjectsResults();
+        wsGetSubjectsResults.setResultMetadata(resultMetadata);
+        wsGetSubjectsResults.setWsSubjects(wsSubjects);
+        return new SubjectsResults(wsGetSubjectsResults);
+    }
+
+    private WsSubject found(String uhUuid) {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setResultCode(SUCCESS);
+        wsSubject.setId(uhUuid);
+        wsSubject.setAttributeValues(new String[] { "uid" + uhUuid, "Name", "Last", "First", "" });
+        return wsSubject;
+    }
+
+    private WsSubject notFound() {
+        WsSubject wsSubject = new WsSubject();
+        wsSubject.setResultCode(SUBJECT_NOT_FOUND);
+        return wsSubject;
+    }
 }

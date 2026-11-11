@@ -2,19 +2,19 @@ package edu.hawaii.its.api.wrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import edu.internet2.middleware.grouperClient.ws.beans.WsAttributeDefName;
 import edu.internet2.middleware.grouperClient.ws.beans.WsFindAttributeDefNamesResults;
 
 public class FindAttributesResults extends Results {
     private final WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults;
+    private List<AttributesResult> results;
 
     public FindAttributesResults(WsFindAttributeDefNamesResults wsFindAttributeDefNamesResults) {
-        if (wsFindAttributeDefNamesResults == null) {
-            this.wsFindAttributeDefNamesResults = new WsFindAttributeDefNamesResults();
-        } else {
-            this.wsFindAttributeDefNamesResults = wsFindAttributeDefNamesResults;
-        }
+        this.wsFindAttributeDefNamesResults =
+                Objects.requireNonNullElseGet(wsFindAttributeDefNamesResults, WsFindAttributeDefNamesResults::new);
+        this.results = null;
     }
 
     @Override public String getResultCode() {
@@ -33,14 +33,18 @@ public class FindAttributesResults extends Results {
     }
 
     public List<AttributesResult> getResults() {
-        WsAttributeDefName[] wsAttributeDefNames = this.wsFindAttributeDefNamesResults.getAttributeDefNameResults();
-        List<AttributesResult> attributesResults = new ArrayList<>();
-        if (isEmpty(wsAttributeDefNames)) {
-            return attributesResults;
+        if (this.results == null) {
+            WsAttributeDefName[] wsAttributeDefNames = this.wsFindAttributeDefNamesResults.getAttributeDefNameResults();
+            this.results = new ArrayList<>();
+            if (!isEmpty(wsAttributeDefNames)) {
+                for (WsAttributeDefName wsAttributeDefName : wsAttributeDefNames) {
+                    this.results.add(new AttributesResult(wsAttributeDefName));
+                }
+            }
         }
-        for (WsAttributeDefName wsAttributeDefName : wsAttributeDefNames) {
-            attributesResults.add(new AttributesResult(wsAttributeDefName));
-        }
-        return attributesResults;
+        return this.results;
+    }
+    public void setResults(List<AttributesResult> results) {
+        this.results = results;
     }
 }

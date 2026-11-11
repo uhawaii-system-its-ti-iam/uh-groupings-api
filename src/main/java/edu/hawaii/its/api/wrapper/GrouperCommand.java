@@ -34,6 +34,19 @@ public abstract class GrouperCommand<T> {
     }
 
     /**
+     * A lookup of uhIdentifier in the subject source sourceId only, or in every source when sourceId is null or
+     * empty. Grouper resolves a lookup that names its source about five times faster, because it otherwise searches
+     * every subject source for the identifier.
+     */
+    protected WsSubjectLookup subjectLookup(String uhIdentifier, String sourceId) {
+        WsSubjectLookup wsSubjectLookup = subjectLookup(uhIdentifier);
+        if (sourceId != null && !sourceId.isEmpty()) {
+            wsSubjectLookup.setSubjectSourceId(sourceId);
+        }
+        return wsSubjectLookup;
+    }
+
+    /**
      * A subject lookup for a group rather than a person. Grouper identifies a group used as a subject by the
      * g:gsa source id.
      */
@@ -44,7 +57,10 @@ public abstract class GrouperCommand<T> {
         return wsSubjectLookup;
     }
 
-    protected boolean isUhUuid(String naming) {
+    /**
+     * Whether naming is a UH number (8 digits), which Grouper looks up as a subject id rather than an identifier.
+     */
+    public static boolean isUhUuid(String naming) {
         return naming != null && naming.matches("^\\d{8}$");
     }
 

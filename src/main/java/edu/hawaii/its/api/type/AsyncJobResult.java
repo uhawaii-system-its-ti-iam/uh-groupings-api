@@ -4,6 +4,7 @@ public class AsyncJobResult {
     private Integer id;
     private String status;
     private Object result;
+    private AsyncJobProgress.Snapshot progress;
 
     public AsyncJobResult() {
     }
@@ -42,5 +43,16 @@ public class AsyncJobResult {
 
     public void setResult(Object result) {
         this.result = result;
+    }
+
+    /**
+     * How far a job that is in progress has gotten, or null when the job does not report its progress.
+     */
+    public AsyncJobProgress.Snapshot getProgress() {
+        return progress;
+    }
+
+    public void setProgress(AsyncJobProgress.Snapshot progress) {
+        this.progress = progress;
     }
 }

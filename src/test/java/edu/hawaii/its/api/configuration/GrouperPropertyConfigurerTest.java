@@ -2,11 +2,17 @@ package edu.hawaii.its.api.configuration;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.env.MockEnvironment;
@@ -14,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import edu.hawaii.its.api.service.BatchExecutor;
 import edu.hawaii.its.api.service.GrouperApiService;
 import edu.hawaii.its.api.service.GrouperService;
 
@@ -29,6 +36,18 @@ public class GrouperPropertyConfigurerTest {
 
     @Autowired
     private GrouperPropertyConfigurer grouperPropertyConfigurer;
+
+    @Value("${groupings.api.grouper.lookup-batch-size}")
+    private int lookupBatchSize;
+
+    @Value("${groupings.api.grouper.update-batch-size}")
+    private int updateBatchSize;
+
+    @Value("${groupings.api.grouper.max-concurrent-requests}")
+    private int maxConcurrentRequests;
+
+    @Value("${groupings.api.grouper.retry-delays-millis}")
+    private List<Long> retryDelaysMillis;
 
     @Test
     public void construction() {
@@ -78,5 +97,23 @@ public class GrouperPropertyConfigurerTest {
         GrouperService service = context.getBean("grouperService", GrouperService.class);
         assertNotNull(service);
         assertTrue(service instanceof GrouperApiService);
+    }
+
+    @Test
+    public void grouperApiServiceSendsBulkRequestsWithTheConfiguredSettings() {
+        GrouperService service = context.getBean("grouperService", GrouperService.class);
+        BatchExecutor batchExecutor = context.getBean(BatchExecutor.class);
+        assertSame(batchExecutor, ReflectionTestUtils.getField(service, "batchExecutor"));
+
+        assertEquals(lookupBatchSize, ReflectionTestUtils.getField(batchExecutor, "lookupBatchSize"));
+        assertEquals(updateBatchSize, ReflectionTestUtils.getField(batchExecutor, "updateBatchSize"));
+        assertEquals(maxConcurrentRequests, ReflectionTestUtils.getField(batchExecutor, "maxConcurrentRequests"));
+        assertEquals(retryDelaysMillis, ReflectionTestUtils.getField(batchExecutor, "retryDelaysMillis"));
+        assertEquals(List.of(5000L, 15000L), retryDelaysMillis);
+
+        // The concurrent batches run on a pool of maxConcurrentRequests threads.
+        ThreadPoolExecutor requestPool =
+                (ThreadPoolExecutor) ReflectionTestUtils.getField(batchExecutor, "requestPool");
+        assertEquals(maxConcurrentRequests, requestPool.getMaximumPoolSize());
     }
 }

@@ -54,6 +54,7 @@ import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
+import edu.hawaii.its.api.type.AsyncJobProgress;
 import edu.hawaii.its.api.type.AsyncJobResult;
 import edu.hawaii.its.api.type.OptRequest;
 import edu.hawaii.its.api.type.OptType;
@@ -471,9 +472,12 @@ public class GroupingsRestControllerv2_1 {
                                                           @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addIncludeMembersAsync...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        AsyncJobProgress progress = new AsyncJobProgress();
         return ResponseEntity
                 .accepted()
-                .body(asyncJobsManager.putJob(updateMemberService.addIncludeMembersAsync(currentUser, path, uhIdentifiers)));
+                .body(asyncJobsManager.putJob(
+                        updateMemberService.addIncludeMembersAsync(currentUser, path, uhIdentifiers, progress),
+                        progress));
     }
 
     /**
@@ -497,9 +501,12 @@ public class GroupingsRestControllerv2_1 {
                                                           @RequestBody List<String> uhIdentifiers) {
         logger.info("Entered REST addExcludeMembersAsync...");
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        AsyncJobProgress progress = new AsyncJobProgress();
         return ResponseEntity
                 .accepted()
-                .body(asyncJobsManager.putJob(updateMemberService.addExcludeMembersAsync(currentUser, path, uhIdentifiers)));
+                .body(asyncJobsManager.putJob(
+                        updateMemberService.addExcludeMembersAsync(currentUser, path, uhIdentifiers, progress),
+                        progress));
     }
 
     /**

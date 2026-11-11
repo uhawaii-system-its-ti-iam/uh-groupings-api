@@ -54,6 +54,16 @@ public class GroupAttributeCommand extends GrouperCommand<GroupAttributeCommand>
         return this;
     }
 
+    public GroupAttributeCommand setAssignType(String assignType) {
+        gcGetAttributeAssignments.assignAttributeAssignType(assignType);
+        return this;
+    }
+
+    public GroupAttributeCommand addMembershipId(String membershipId) {
+        gcGetAttributeAssignments.addOwnerMembershipId(membershipId);
+        return this;
+    }
+
     public GroupAttributeCommand owner(String uhIdentifier) {
         gcGetAttributeAssignments.assignActAsSubject(subjectLookup(uhIdentifier));
         return this;
