@@ -406,15 +406,15 @@ public class TestUpdateMemberService {
             ReflectionTestUtils.setField(updateMemberService, "OWNERS_LIMIT", originalLimit);
         }
 
-        int directOwnersCount =
-                groupingAssignmentService.numberOfDirectOwners(ADMIN, GROUPING);
-        GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(directOwnersCount);
+        int directUserOwnerCount =
+                groupingAssignmentService.numberOfDirectUserOwners(ADMIN, GROUPING);
+        GroupingMembers testGroupingMembers = uhIdentifierGenerator.getRandomMembers(directUserOwnerCount);
         List<String> uidsToRemove = testGroupingMembers.getUids();
 
         try {
             updateMemberService.removeOwnerships(ADMIN, GROUPING, uidsToRemove);
             fail("Should throw an exception if the number of valid owners being removed "
-                    + "is greater than or equal to the number of direct owners");
+                    + "is greater than or equal to the number of direct user owners");
         } catch (DirectOwnerRemovedException e) {
             assertNull(e.getCause());
         }

@@ -11,6 +11,6 @@ public class DirectOwnerRemovedExceptionTest {
     public void construction() {
         DirectOwnerRemovedException dore = new DirectOwnerRemovedException();
         assertNotNull(dore);
-        assertEquals("At least one direct owner is required.", dore.getMessage());
+        assertEquals("At least one direct user owner is required.", dore.getMessage());
     }
 }

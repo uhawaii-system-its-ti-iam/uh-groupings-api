@@ -86,11 +86,13 @@ Path validation: `[\\w-:.]+` regex, max 255 characters.
 ### Ownership Model
 Owners manage a grouping and can add/remove members, change attributes, etc.
 
-**Direct owners:** Individual users in the `:owners` group.
+**Direct user owners:** Individual users directly assigned to the `:owners` group.
 
-**Indirect owners (owner-groupings):** Groups used as owners. Members of these groups inherit owner privileges.
+**Direct owner entries:** Individual users and owner-groupings directly assigned to the `:owners` group. Each counts as one entry.
 
-**Duplicate owners:** Users who are both direct owners AND members of owner-groupings. Tracked separately to prevent accidental removal.
+**Indirect user owners:** Users who inherit owner privileges through an owner-grouping.
+
+**Duplicate owners:** Users who are both direct user owners and members of owner-groupings. Tracked separately to prevent accidental removal.
 
 **Owner limit:** Configurable maximum to prevent excessive ownership.
 
@@ -318,13 +320,13 @@ POST   /api/groupings/v2.1/groupings/{groupingPath}/exclude-members/in-list
 ### Owner Management
 ```
 GET    /api/groupings/v2.1/grouping/{path}/owners
-       → GroupingOwnerMembers (immediate owners + owner-groupings)
+       → GroupingOwnerMembers (direct owner entries: users and owner-groupings)
 
 GET    /api/groupings/v2.1/groupings/{path}/owners/count
-       → Integer (all owners: direct + indirect)
+       → Integer (all individual user owners: direct and indirect)
 
 GET    /api/groupings/v2.1/members/{path}/owners/count
-       → Integer (direct owners only)
+       → Integer (direct user owners only)
 
 GET    /api/groupings/v2.1/groupings/{path}/owners/duplicates
        → Map<String, OwnerResult> (users with multiple ownership sources)

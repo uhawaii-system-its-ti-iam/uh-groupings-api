@@ -130,24 +130,23 @@ public class GroupingAssignmentService {
     }
 
     /**
-     * Get number of immediate owners in a grouping. Owners with "IMMEDIATE" filter.
-     * It includes direct owners + owner-groupings.
+     * Returns the number of directly assigned owner entries in a grouping.
+     * Includes individual user owners and owner-groupings.
      */
-    public Integer numberOfImmediateOwners(String currentUser, String groupPath, String uhIdentifier) {
-        logger.debug(String.format("numberOfImmediateOwners; currentUser: %s; groupPath: %s; uidToCheck: %s;",
+    public Integer numberOfDirectOwnerEntries(String currentUser, String groupPath, String uhIdentifier) {
+        logger.debug(String.format("numberOfDirectOwnerEntries; currentUser: %s; groupPath: %s; uidToCheck: %s;",
                 currentUser, groupPath, uhIdentifier));
         if (!memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
-        GroupingGroupMembers owners = groupingImmediateOwners(currentUser, groupPath).getOwners();
+        GroupingGroupMembers owners = groupingDirectOwnerEntries(currentUser, groupPath).getOwners();
 
         return owners.getMembers().size();
     }
 
     /**
-     * Get number of all owners in a grouping. Owners with "ALL" filter.
-     * It includes direct owners + indirect owners.
-     * (Excludes owner-groupings)
+     * Returns the number of all individual user owners in a grouping.
+     * Includes direct and indirect user owners, but excludes owner-groupings.
      */
     public Integer numberOfAllOwners(String currentUser, String groupPath) {
         logger.debug(String.format("numberOfAllOwners; currentUser: %s; groupPath: %s;",
@@ -169,24 +168,24 @@ public class GroupingAssignmentService {
     }
 
     /**
-     * Get number of direct owners in a grouping.
+     * Returns the number of directly assigned individual user owners in a grouping.
      */
-    public Integer numberOfDirectOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("numberOfDirectOwners; currentUser: %s; groupingPath: %s;",
+    public Integer numberOfDirectUserOwners(String currentUser, String groupingPath) {
+        logger.info(String.format("numberOfDirectUserOwners; currentUser: %s; groupingPath: %s;",
                 currentUser, groupingPath));
         // Check specific grouping ownership (Grouper) OR general admin role (JWT)
         if (!memberService.isCurrentUserAdmin() && !memberService.isOwner(groupingPath, currentUser)) {
             throw new AccessDeniedException();
         }
-        GroupingOwnerMembers immediateOwners = new GroupingOwnerMembers(grouperService
+        GroupingOwnerMembers directOwnerEntries = new GroupingOwnerMembers(grouperService
                 .getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
 
-        Integer directOwnerCount = 0;
-        for (GroupingGroupMember owner : immediateOwners.getOwners().getMembers()) {
+        Integer directUserOwnerCount = 0;
+        for (GroupingGroupMember owner : directOwnerEntries.getOwners().getMembers()) {
             if (!owner.getName().contains(":"))
-                directOwnerCount++;
+                directUserOwnerCount++;
         }
-        return directOwnerCount;
+        return directUserOwnerCount;
     }
 
     /**
@@ -202,20 +201,20 @@ public class GroupingAssignmentService {
                 && !memberService.isOwner(groupPath, currentUser)) {
             throw new AccessDeniedException();
         }
-        GroupingGroupMembers immediateOwners = groupingImmediateOwners(currentUser, groupPath).getOwners();
+        GroupingGroupMembers directOwnerEntries = groupingDirectOwnerEntries(currentUser, groupPath).getOwners();
         Map<String, OwnerResult> existingUhUuids = new HashMap<>();
         Map<String, OwnerResult> duplicates = new HashMap<>();
         ArrayList<String> ownerGroupings = new ArrayList<>();
 
-        // Iterate through immediate owners to log direct owners and owner-groupings
-        for (GroupingGroupMember owner : immediateOwners.getMembers()) {
+        // Iterate through direct owner entries to identify individual user owners and owner-groupings
+        for (GroupingGroupMember owner : directOwnerEntries.getMembers()) {
             String uhUuid = owner.getUhUuid();
             String name = owner.getName();
             if (name.contains(":")) {
                 ownerGroupings.add(name);
                 continue;
             }
-            // For direct owners, we do not add a path to indicate DIRECT ownership; only owner-groupings add a path below.
+            // Direct user owners do not need a source path; only owner-groupings add a path below.
             existingUhUuids.put(uhUuid, new OwnerResult(uhUuid, name, owner.getUid()));
         }
 
@@ -244,7 +243,7 @@ public class GroupingAssignmentService {
     }
 
     /**
-     * All owners including direct, owner-groupings and indirect owners.
+     * Returns all owners, including direct user owners, owner-groupings, and indirect user owners.
      */
     public GroupingOwnerMembers groupingAllOwners(String currentUser, String groupingPath) {
         logger.info(String.format("groupingAllOwners; currentUser: %s; groupingPath: %s;", currentUser, groupingPath));
@@ -253,11 +252,11 @@ public class GroupingAssignmentService {
     }
 
     /**
-     * Direct owners + owner-groupings.
+     * Returns directly assigned owner entries, including individual user owners and owner-groupings.
      */
-    public GroupingOwnerMembers groupingImmediateOwners(String currentUser, String groupingPath) {
-        logger.info(String.format("groupingImmediateOwners; currentUser: %s; groupingPath: %s;", currentUser,
-                groupingPath));
+    public GroupingOwnerMembers groupingDirectOwnerEntries(String currentUser, String groupingPath) {
+        logger.info(String.format("groupingDirectOwnerEntries; currentUser: %s; groupingPath: %s;",
+                currentUser, groupingPath));
         return new GroupingOwnerMembers(
                 grouperService.getImmediateMembers(currentUser, groupingPath + GroupType.OWNERS.value()), OWNERS_LIMIT);
     }

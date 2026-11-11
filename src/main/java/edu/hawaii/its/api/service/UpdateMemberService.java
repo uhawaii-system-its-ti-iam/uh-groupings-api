@@ -135,9 +135,9 @@ public class UpdateMemberService {
         checkIfOwnerOrAdminUser(currentUser, groupingPath);
         List<String> validIdentifiers = subjectService.getValidUhUuids(currentUser, uhIdentifiers);
 
-        // Make sure that there would be at least one direct owner remaining after the operation.
-        Integer directOwners = groupingAssignmentService.numberOfDirectOwners(currentUser, groupingPath);
-        if ((directOwners - validIdentifiers.size()) <= 0) {
+        // Make sure that at least one direct user owner remains after the operation.
+        Integer directUserOwnerCount = groupingAssignmentService.numberOfDirectUserOwners(currentUser, groupingPath);
+        if ((directUserOwnerCount - validIdentifiers.size()) <= 0) {
             throw new DirectOwnerRemovedException();
         }
         return removeOwners(currentUser, groupingPath, validIdentifiers);
