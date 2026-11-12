@@ -30,13 +30,13 @@ import edu.internet2.middleware.grouperClient.ws.beans.WsGroup;
 import edu.internet2.middleware.grouperClient.ws.beans.WsSubject;
 
 @ExtendWith(MockitoExtension.class)
-public class RetireGroupingServiceTest {
+public class RequestGrouperRetirementTest {
 
     private static final String CURRENT_USER = "rainem";
 
     private static final String GROUPING_PATH = "hawaii.edu:custom:test:listserv-tests:JTTEST-L";
 
-    private RetireGroupingService retireGroupingService;
+    private RequestGrouperRetirement requestGrouperRetirement;
 
     @Mock
     private GrouperService grouperService;
@@ -58,7 +58,7 @@ public class RetireGroupingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        retireGroupingService = new RetireGroupingService(grouperService, emailService, memberService);
+        requestGrouperRetirement = new RequestGrouperRetirement(grouperService, emailService, memberService);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class RetireGroupingServiceTest {
                 eq("Changing description test"), org.mockito.ArgumentMatchers.anyList(), eq("Requestor Name")))
                 .willReturn(emailResult);
 
-        RetireGroupingResult result = retireGroupingService.retireGrouping(CURRENT_USER, GROUPING_PATH);
+        RetireGroupingResult result = requestGrouperRetirement.retireGrouping(CURRENT_USER, GROUPING_PATH);
 
         assertEquals("SUCCESS", result.getResultCode());
 
@@ -124,7 +124,7 @@ public class RetireGroupingServiceTest {
         given(memberService.isOwner(GROUPING_PATH, CURRENT_USER)).willReturn(false);
 
         assertThrows(AccessDeniedException.class,
-                () -> retireGroupingService.retireGrouping(CURRENT_USER, GROUPING_PATH));
+                () -> requestGrouperRetirement.retireGrouping(CURRENT_USER, GROUPING_PATH));
 
         verifyNoInteractions(emailService);
     }

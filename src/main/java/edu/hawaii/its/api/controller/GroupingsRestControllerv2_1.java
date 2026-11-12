@@ -52,7 +52,7 @@ import edu.hawaii.its.api.service.GroupingOwnerService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.RetireGroupingService;
+import edu.hawaii.its.api.service.RequestGrouperRetirement;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Announcements;
 import edu.hawaii.its.api.type.AsyncJobResult;
@@ -89,7 +89,7 @@ public class GroupingsRestControllerv2_1 {
 
     private final AnnouncementsService announcementsService;
 
-    private final RetireGroupingService retireGroupingService;
+    private final RequestGrouperRetirement requestGrouperRetirement;
 
     public GroupingsRestControllerv2_1(AsyncJobsManager asyncJobsManager,
             GroupingAttributeService groupingAttributeService,
@@ -100,7 +100,7 @@ public class GroupingsRestControllerv2_1 {
             MemberService memberService,
             GroupingOwnerService groupingOwnerService,
             AnnouncementsService announcementsService,
-            RetireGroupingService retireGroupingService) {
+            RequestGrouperRetirement requestGrouperRetirement) {
         this.asyncJobsManager = asyncJobsManager;
         this.groupingAttributeService = groupingAttributeService;
         this.groupingAssignmentService = groupingAssignmentService;
@@ -110,7 +110,7 @@ public class GroupingsRestControllerv2_1 {
         this.memberService = memberService;
         this.groupingOwnerService = groupingOwnerService;
         this.announcementsService = announcementsService;
-        this.retireGroupingService = retireGroupingService;
+        this.requestGrouperRetirement = requestGrouperRetirement;
     }
 
     @PostConstruct
@@ -305,7 +305,7 @@ public class GroupingsRestControllerv2_1 {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
-                .body(retireGroupingService.retireGrouping(currentUser, path));
+                .body(requestGrouperRetirement.retireGrouping(currentUser, path));
     }
 
     /**

@@ -20,9 +20,9 @@ import edu.hawaii.its.api.wrapper.SubjectsResults;
  * Handles grouping retirement requests and owner notification lookup.
  */
 @Service
-public class RetireGroupingService {
+public class RequestGrouperRetirement {
 
-    private static final Log logger = LogFactory.getLog(RetireGroupingService.class);
+    private static final Log logger = LogFactory.getLog(RequestGrouperRetirement.class);
 
     private static final String EMAIL_DOMAIN = "@hawaii.edu";
 
@@ -32,7 +32,7 @@ public class RetireGroupingService {
 
     private final MemberService memberService;
 
-    public RetireGroupingService(GrouperService grouperService, EmailService emailService, MemberService memberService) {
+    public RequestGrouperRetirement(GrouperService grouperService, EmailService emailService, MemberService memberService) {
         this.grouperService = grouperService;
         this.emailService = emailService;
         this.memberService = memberService;

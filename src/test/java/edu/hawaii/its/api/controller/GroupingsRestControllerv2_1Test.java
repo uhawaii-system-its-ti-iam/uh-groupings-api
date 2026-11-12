@@ -71,7 +71,7 @@ import edu.hawaii.its.api.service.GroupingsService;
 import edu.hawaii.its.api.service.MemberAttributeService;
 import edu.hawaii.its.api.service.MemberService;
 import edu.hawaii.its.api.service.MembershipService;
-import edu.hawaii.its.api.service.RetireGroupingService;
+import edu.hawaii.its.api.service.RequestGrouperRetirement;
 import edu.hawaii.its.api.service.UpdateMemberService;
 import edu.hawaii.its.api.type.Group;
 import edu.hawaii.its.api.type.Grouping;
@@ -140,7 +140,7 @@ public class GroupingsRestControllerv2_1Test {
     private GroupingsService groupingsService;
 
     @MockitoBean
-    private RetireGroupingService retireGroupingService;
+    private RequestGrouperRetirement requestGrouperRetirement;
 
     @MockitoBean
     private MemberService memberService;
@@ -456,7 +456,7 @@ public class GroupingsRestControllerv2_1Test {
     public void requestGroupingRetirementTest() throws Exception {
         RetireGroupingResult retireGroupingResult = new RetireGroupingResult("SUCCESS",
                 "Retirement request emails were sent.", List.of("owner@hawaii.edu"));
-        given(retireGroupingService.retireGrouping(TEST_USER, GROUPING)).willReturn(retireGroupingResult);
+        given(requestGrouperRetirement.retireGrouping(TEST_USER, GROUPING)).willReturn(retireGroupingResult);
 
         mockMvc.perform(post(API_BASE + "/groupings/" + GROUPING + "/retirement-requests"))
                 .andExpect(status().isOk())
@@ -464,7 +464,7 @@ public class GroupingsRestControllerv2_1Test {
                 .andExpect(jsonPath("$.resultMessage").value(retireGroupingResult.getResultMessage()))
                 .andExpect(jsonPath("$.ownerRecipients[0]").value("owner@hawaii.edu"));
 
-        verify(retireGroupingService, times(1)).retireGrouping(TEST_USER, GROUPING);
+        verify(requestGrouperRetirement, times(1)).retireGrouping(TEST_USER, GROUPING);
     }
 
     @Test
