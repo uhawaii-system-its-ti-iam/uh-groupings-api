@@ -1,13 +1,16 @@
 package edu.hawaii.its.api.service;
 
+import static edu.hawaii.its.api.service.PathFilter.pathHasOwner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import edu.hawaii.its.api.controller.WithMockUhAdmin;
 import edu.hawaii.its.api.groupings.ManageSubjectResults;
@@ -23,6 +26,7 @@ import org.springframework.test.context.ActiveProfiles;
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
 import edu.hawaii.its.api.exception.AccessDeniedException;
 import edu.hawaii.its.api.exception.UhIdentifierNotFoundException;
+import edu.hawaii.its.api.wrapper.Group;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -168,10 +172,24 @@ public class TestMembershipService {
      * Manage Person, so the grouping used as the owner-grouping is flagged.
      */
     @Test
+    @WithMockUhAdmin
     public void manageSubjectResultsFlagsOwnerGroupingTest() {
         updateMemberService.addIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
+        ArrayList<String> groupingPaths = new ArrayList<>();
         try {
-            updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+            // Ensures that OWNER-GROUPING is not an owner of any grouping before testing.
+            Map<String, List<Group>> groupsByGroupingPath =
+                    grouperService.getGroupsOfGroups(List.of(OWNER_GROUPING)).getGroupsBySubjectName();
+            for (List<Group> groups : groupsByGroupingPath.values()) {
+                for (Group group : groups) {
+                    String groupPath = group.getGroupPath();
+                    if (pathHasOwner().test(groupPath)) {
+                        String groupingPath = PathFilter.parentGroupingPath(group.getGroupPath());
+                        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, groupingPath, List.of(OWNER_GROUPING));
+                        groupingPaths.add(groupingPath);
+                    }
+                }
+            }
 
             ManageSubjectResult result = ownerGroupingResult();
             assertNotNull(result);
@@ -184,6 +202,10 @@ public class TestMembershipService {
         } finally {
             updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
             updateMemberService.removeIncludeMembers(ADMIN, OWNER_GROUPING, List.of(testUids.get(0)));
+
+            for (String groupingPath : groupingPaths) {
+                updateMemberService.addOwnerGroupingOwnerships(ADMIN, groupingPath, List.of(OWNER_GROUPING));
+            }
         }
     }
 
