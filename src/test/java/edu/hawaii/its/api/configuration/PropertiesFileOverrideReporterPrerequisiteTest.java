@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -25,6 +26,16 @@ public class PropertiesFileOverrideReporterPrerequisiteTest {
     private static final String PASSWORD = "s3cret-password";
     private static final String GROUPING_MANY = "tmp:jdoe:jdoe-many";
     private static final String GROUPING_SINGLE = "tmp:jdoe:jdoe-single";
+    private static final String GROUPING_LARGE = "tmp:jdoe:jdoe-large";
+    private static final String GROUPING_TRUE_EMPTY = "tmp:jdoe:jdoe-true-empty";
+    private static final String OWNER_GROUPING = "tmp:jdoe:jdoe-complex";
+    private static final List<String> REQUIRED_GROUPINGS =
+            List.of(GROUPING_MANY, GROUPING_SINGLE, GROUPING_LARGE, GROUPING_TRUE_EMPTY, OWNER_GROUPING);
+
+    @AfterEach
+    public void clearRecordedFailure() {
+        PropertiesFileOverrideReporter.clearPrerequisiteFailure();
+    }
 
     @Test
     public void missingOverridesFileIsReportedBeforeOtherBeansAreCreated() {
@@ -178,6 +189,16 @@ public class PropertiesFileOverrideReporterPrerequisiteTest {
     }
 
     @Test
+    public void missingGroupingOtherThanManyOrSingleIsNamed() {
+        String message = prerequisiteMessage("CONFIGURED", USER, ADMIN, PASSWORD, path -> !OWNER_GROUPING.equals(path));
+
+        assertTrue(message.contains("groupings.api.localhost.user is " + USER));
+        assertTrue(message.contains(OWNER_GROUPING));
+        assertFalse(message.contains(GROUPING_MANY));
+        assertFalse(message.contains(GROUPING_LARGE));
+    }
+
+    @Test
     public void configuredEnvironmentReturnsNoMessage() {
         List<String> checked = new ArrayList<>();
         String message = prerequisiteMessage("CONFIGURED", USER, ADMIN, PASSWORD, path -> {
@@ -186,8 +207,19 @@ public class PropertiesFileOverrideReporterPrerequisiteTest {
         });
 
         assertNull(message);
-        assertTrue(checked.contains(GROUPING_MANY));
-        assertTrue(checked.contains(GROUPING_SINGLE));
+        assertTrue(checked.containsAll(REQUIRED_GROUPINGS));
+    }
+
+    @Test
+    public void unitTestFailuresAreNotLeftForTheEndOfRunBanner() {
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        beanFactory.registerSingleton(AbstractApplicationContext.ENVIRONMENT_BEAN_NAME, new MockEnvironment());
+        assertThrows(IllegalStateException.class,
+                () -> new PropertiesFileOverrideReporter.OverridesFileCheck().postProcessBeanFactory(beanFactory));
+
+        PropertiesFileOverrideReporter.clearPrerequisiteFailure();
+
+        assertNull(PropertiesFileOverrideReporter.prerequisiteFailure());
     }
 
     private static void assertSkeletonMessage(String message) {
@@ -198,8 +230,7 @@ public class PropertiesFileOverrideReporterPrerequisiteTest {
         assertTrue(message.contains("groupings.api.localhost.user"));
         assertTrue(message.contains("groupings.api.test.admin_user"));
         assertTrue(message.contains("properties.override.result=CONFIGURED"));
-        assertTrue(message.contains("tmp:<user>:<user>-many"));
-        assertTrue(message.contains("tmp:<user>:<user>-single"));
+        assertTrue(message.contains("groupings.api.test.required_groupings"));
         assertFalse(message.contains(PASSWORD));
     }
 
@@ -219,8 +250,7 @@ public class PropertiesFileOverrideReporterPrerequisiteTest {
                 localhostUser,
                 adminUser,
                 password,
-                GROUPING_MANY,
-                GROUPING_SINGLE,
+                REQUIRED_GROUPINGS,
                 pathExists);
     }
 
