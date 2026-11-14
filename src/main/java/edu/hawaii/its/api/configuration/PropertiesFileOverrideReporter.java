@@ -1,6 +1,7 @@
 package edu.hawaii.its.api.configuration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -24,8 +25,8 @@ public class PropertiesFileOverrideReporter {
     private static final Log logger = LogFactory.getLog(PropertiesFileOverrideReporter.class);
     private static final String PLACEHOLDER_USER = "test_user";
     private static final String PLACEHOLDER_ADMIN = "test_admin";
-    private static final String RED = "[31m";
-    private static final String RESET = "[0m";
+    private static final String RED = "\u001B[31m";
+    private static final String RESET = "\u001B[0m";
     private static final String RULE = "=".repeat(80);
 
     /* Set when an integration-test prerequisite check fails, so it can be repeated at the end of the run. */
@@ -54,6 +55,14 @@ public class PropertiesFileOverrideReporter {
     }
 
     /**
+     * Forgets a recorded prerequisite failure. For unit tests that exercise a failing check,
+     * so their failure is not reported as an integration-test failure at the end of the run.
+     */
+    static void clearPrerequisiteFailure() {
+        prerequisiteFailure = null;
+    }
+
+    /**
      * Wraps the message in a red banner so it stands out at the end of the test output.
      */
     public static String banner(String message) {
@@ -76,14 +85,13 @@ public class PropertiesFileOverrideReporter {
             String localhostUser,
             String adminUser,
             String password,
-            String groupingMany,
-            String groupingSingle,
+            List<String> requiredGroupings,
             Predicate<String> pathExists) {
         String blocker = overridesFileBlocker(overrideResult, overridesPath, localhostUser, adminUser, password);
         if (blocker != null) {
             return blocker;
         }
-        return missingGroupingMessage(localhostUser, groupingMany, groupingSingle, pathExists);
+        return missingGroupingMessage(localhostUser, requiredGroupings, pathExists);
     }
 
     /**
@@ -129,8 +137,7 @@ public class PropertiesFileOverrideReporter {
             @Value("${groupings.api.localhost.user:}") String localhostUser,
             @Value("${groupings.api.test.admin_user:}") String adminUser,
             @Value("${grouperClient.webService.password:}") String password,
-            @Value("${groupings.api.test.grouping_many:}") String groupingMany,
-            @Value("${groupings.api.test.grouping_single:}") String groupingSingle,
+            @Value("${groupings.api.test.required_groupings:}") String[] requiredGroupings,
             GroupPathService groupPathService) {
         return new IntegrationTestPrerequisiteCheck(
                 overrideResult,
@@ -138,8 +145,7 @@ public class PropertiesFileOverrideReporter {
                 localhostUser,
                 adminUser,
                 password,
-                groupingMany,
-                groupingSingle,
+                Arrays.stream(requiredGroupings).map(String::trim).filter(path -> !path.isEmpty()).toList(),
                 groupPathService);
     }
 
@@ -159,9 +165,8 @@ public class PropertiesFileOverrideReporter {
                 "Copy uh-groupings-api-overrides.skeleton.properties there, set",
                 "groupings.api.localhost.user and groupings.api.test.admin_user to your UH username,",
                 "set the Grouper test password, and set properties.override.result=CONFIGURED.",
-                "The suite expects these groupings to already exist in Grouper test:",
-                "  tmp:<user>:<user>-many",
-                "  tmp:<user>:<user>-single");
+                "The suite expects the groupings listed in groupings.api.test.required_groupings",
+                "(application-integrationTest.properties) to already exist in Grouper test.");
     }
 
     /**
@@ -194,15 +199,13 @@ public class PropertiesFileOverrideReporter {
 
     private static String missingGroupingMessage(
             String localhostUser,
-            String groupingMany,
-            String groupingSingle,
+            List<String> requiredGroupings,
             Predicate<String> pathExists) {
         List<String> missing = new ArrayList<>();
-        if (!pathExists.test(groupingMany)) {
-            missing.add(groupingMany);
-        }
-        if (!pathExists.test(groupingSingle)) {
-            missing.add(groupingSingle);
+        for (String path : requiredGroupings) {
+            if (!pathExists.test(path)) {
+                missing.add(path);
+            }
         }
         if (missing.isEmpty()) {
             return null;
@@ -240,8 +243,7 @@ public class PropertiesFileOverrideReporter {
         private final String localhostUser;
         private final String adminUser;
         private final String password;
-        private final String groupingMany;
-        private final String groupingSingle;
+        private final List<String> requiredGroupings;
         private final GroupPathService groupPathService;
 
         IntegrationTestPrerequisiteCheck(
@@ -250,16 +252,14 @@ public class PropertiesFileOverrideReporter {
                 String localhostUser,
                 String adminUser,
                 String password,
-                String groupingMany,
-                String groupingSingle,
+                List<String> requiredGroupings,
                 GroupPathService groupPathService) {
             this.overrideResult = overrideResult;
             this.overridesPath = overridesPath;
             this.localhostUser = localhostUser;
             this.adminUser = adminUser;
             this.password = password;
-            this.groupingMany = groupingMany;
-            this.groupingSingle = groupingSingle;
+            this.requiredGroupings = requiredGroupings;
             this.groupPathService = groupPathService;
         }
 
@@ -272,8 +272,7 @@ public class PropertiesFileOverrideReporter {
                     localhostUser,
                     adminUser,
                     password,
-                    groupingMany,
-                    groupingSingle,
+                    requiredGroupings,
                     groupPathService::isValidPath);
             if (message != null) {
                 fail(message);
