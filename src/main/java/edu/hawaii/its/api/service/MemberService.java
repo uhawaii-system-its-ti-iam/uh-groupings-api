@@ -59,7 +59,7 @@ public class MemberService {
      * This method uses SecurityContext (populated by JWT) instead of querying Grouper.
      * Use this for general authorization checks in service methods.
      * 
-     * @return true if the current user has ROLE_ADMIN in their JWT token
+     * @return true if the current user has the ADMIN role in their JWT token
      */
     public boolean isCurrentUserAdmin() {
         return securityContextRoleService.isCurrentUserAdmin();
@@ -70,7 +70,7 @@ public class MemberService {
      * This method uses SecurityContext (populated by JWT) instead of querying Grouper.
      * Use this for general authorization checks in service methods.
      * 
-     * @return true if the current user has ROLE_OWNER in their JWT token
+     * @return true if the current user has the OWNER role in their JWT token
      */
     public boolean isCurrentUserOwner() {
         return securityContextRoleService.isCurrentUserOwner();
