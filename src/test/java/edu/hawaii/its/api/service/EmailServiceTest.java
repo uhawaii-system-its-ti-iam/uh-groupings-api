@@ -247,10 +247,13 @@ public class EmailServiceTest {
                 List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"),
                 "Requestor Name");
 
-        assertEquals("FAILURE", result.getResultCode());
-        assertEquals("Failed to send the grouping owners notification email.", result.getResultMessage());
+        assertEquals("PARTIAL_SUCCESS", result.getResultCode());
+        assertEquals("Your retirement request was sent to IAM, but we couldn't notify "
+                + "the grouping owners. Do not submit another retirement request.", result.getResultMessage());
         assertEquals(List.of("owner-one@hawaii.edu", "owner-two@hawaii.edu"), result.getOwnerRecipients());
         assertEquals(1, messagesSent.size());
+        assertEquals(List.of("iam-team-test@hawaii.edu"), Arrays.asList(messagesSent.get(0).getTo()));
+        verify(javaMailSender, times(2)).send(any(SimpleMailMessage.class));
     }
 
     @Test

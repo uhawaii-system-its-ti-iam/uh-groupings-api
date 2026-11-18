@@ -209,7 +209,10 @@ public class EmailService {
         String ownersSubject = "Request sent to IAM to retire grouping " + groupingName;
         String ownersBody = buildOwnersEmailBody(groupingName, description, groupingPath, requestorName);
         if (!sendEmail(ownerEmails.toArray(new String[0]), ownersSubject, ownersBody)) {
-            return retirementResult(false, "Failed to send the grouping owners notification email.", ownerEmails);
+            return new RetireGroupingResult("PARTIAL_SUCCESS",
+                    "Your retirement request was sent to IAM, but we couldn't notify "
+                            + "the grouping owners. Do not submit another retirement request.",
+                    ownerEmails);
         }
 
         return retirementResult(true, "Retirement request emails were sent.", ownerEmails);
