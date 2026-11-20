@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,10 +24,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import edu.hawaii.its.api.configuration.SpringBootWebApplication;
-import edu.hawaii.its.api.controller.WithMockUhAdmin;
 import edu.hawaii.its.api.groupings.GroupingUpdateDescriptionResult;
+import edu.hawaii.its.api.wrapper.Group;
 import edu.hawaii.its.api.type.GroupingPath;
 import edu.hawaii.its.api.util.ServiceTest;
+import edu.hawaii.its.api.wrapper.GetGroupsResults;
 
 @ActiveProfiles("integrationTest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,6 +54,9 @@ public class TestGroupingsService extends ServiceTest {
 
     @Value("${groupings.api.test.uh-uuids}")
     private List<String> TEST_UH_UUIDS;
+
+    @Autowired
+    private GrouperService grouperService;
 
     @Autowired
     private GroupingsService groupingsService;
@@ -120,21 +126,41 @@ public class TestGroupingsService extends ServiceTest {
     @Test
     public void ownerGroupingPaths() {
         assertTrue(groupingsService.ownerGroupingPaths(Collections.emptyList()).isEmpty());
-
         updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
+        List<String> groupingPaths = new ArrayList<>();
         try {
-            Set<String> results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
+            // Ensures that OWNER-GROUPING is not an owner of any grouping before testing.
+            Map<String, List<Group>> groupsByGroupingPath =
+                    grouperService.getGroupsOfGroups(List.of(OWNER_GROUPING)).getGroupsBySubjectName();
+            for (List<Group> groups : groupsByGroupingPath.values()) {
+                for (Group group : groups) {
+                    String groupPath = group.getGroupPath();
+                    if (pathHasOwner().test(groupPath)) {
+                        String groupingPath = PathFilter.parentGroupingPath(group.getGroupPath());
+                        updateMemberService.removeOwnerGroupingOwnerships(ADMIN, groupingPath, List.of(OWNER_GROUPING));
+                        groupingPaths.add(groupingPath);
+                    }
+                }
+            }
+
+            Set<String> results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING));
             assertFalse(results.contains(OWNER_GROUPING));
 
             updateMemberService.addOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
-            results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
+            results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING));
             assertTrue(results.contains(OWNER_GROUPING));
         } finally {
             updateMemberService.removeOwnerGroupingOwnerships(ADMIN, GROUPING, List.of(OWNER_GROUPING));
         }
 
-        Set<String> results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING, GROUPING));
-        assertFalse(results.contains(OWNER_GROUPING));
+        try {
+            Set<String> results = groupingsService.ownerGroupingPaths(List.of(OWNER_GROUPING));
+            assertFalse(results.contains(OWNER_GROUPING));
+        } finally {
+            for (String groupingPath : groupingPaths) {
+                updateMemberService.addOwnerGroupingOwnerships(ADMIN, groupingPath, List.of(OWNER_GROUPING));
+            }
+        }
     }
 
     @Test

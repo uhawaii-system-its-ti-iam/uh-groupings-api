@@ -43,7 +43,7 @@ public class TestUpdateTimestampService {
 
     @Test
     public void updateFailure() {
-        String json = propertyValue("ws.add.member.results.failure");
+        String json = propertyValue("ws.add.member.results.failure.generic");
         WsAddMemberResults wsAddMemberResults = JsonUtil.asObject(json, WsAddMemberResults.class);
         AddMembersResults addMembersResults = new AddMembersResults(wsAddMemberResults);
         GroupingAddResults groupingAddResults = new GroupingAddResults(addMembersResults);
