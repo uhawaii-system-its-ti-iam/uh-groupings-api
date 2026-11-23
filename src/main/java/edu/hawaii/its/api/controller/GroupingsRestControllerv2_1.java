@@ -774,7 +774,8 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Used to check if the user is a sole owner of a grouping.
+     * Returns the number of directly assigned individual user owners in a grouping.
+     * Used to check whether a grouping has only one direct user owner.
      */
     @GetMapping(value = "/members/{path:[\\w-:.]+}/owners/count")
     @ResponseBody
@@ -783,12 +784,12 @@ public class GroupingsRestControllerv2_1 {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.numberOfDirectOwners(currentUser, path));
+                .body(groupingAssignmentService.numberOfDirectUserOwners(currentUser, path));
     }
 
     /**
-     * Get number of all owners (direct + indirect) in a grouping.
-     * Owners with "ALL" filter.
+     * Returns the number of all individual user owners in a grouping.
+     * Includes direct and indirect user owners, but excludes owner-groupings.
      */
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/count")
     @ResponseBody
@@ -803,8 +804,8 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * Get all duplicated owners in a grouping, and their sources of ownership.
-     * (Either both a direct owner and indirect owner, or multiple indirect owners via different owner-groupings.)
+     * Returns owners with multiple sources of ownership in a grouping.
+     * Includes direct user owners with indirect ownership or users with indirect ownership through multiple owner-groupings.
      */
     @GetMapping(value = "/groupings/{path:[\\w-:.]+}/owners/duplicates")
     public ResponseEntity<Map<String, OwnerResult>> getDuplicateOwners(@PathVariable String path) {
@@ -817,8 +818,8 @@ public class GroupingsRestControllerv2_1 {
     }
 
     /**
-     * A list of immediate owners listed in a grouping.
-     * Owners with "IMMEDIATE" filter.
+     * Returns directly assigned owner entries in a grouping.
+     * Includes individual user owners and owner-groupings.
      */
     @GetMapping(value = "/grouping/{path:[\\w-:.]+}/owners")
     public ResponseEntity<GroupingOwnerMembers> groupingOwners(@PathVariable String path) {
@@ -826,7 +827,7 @@ public class GroupingsRestControllerv2_1 {
         String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity
                 .ok()
-                .body(groupingAssignmentService.groupingImmediateOwners(currentUser, path));
+                .body(groupingAssignmentService.groupingDirectOwnerEntries(currentUser, path));
     }
 
     /**

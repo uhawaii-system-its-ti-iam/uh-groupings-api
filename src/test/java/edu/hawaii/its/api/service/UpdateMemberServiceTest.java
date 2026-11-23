@@ -308,7 +308,7 @@ public class UpdateMemberServiceTest {
         doReturn(subjectsResults).when(grouperService).getSubjects(TEST_UIDS);
 
         doReturn(TEST_UIDS.size() + 1).when(groupingAssignmentService)
-                .numberOfDirectOwners(TEST_UIDS.get(0), groupPath);
+                .numberOfDirectUserOwners(TEST_UIDS.get(0), groupPath);
 
         RemoveMembersResults removeMembersResults = groupingsTestConfiguration.deleteMemberResultsFailureTestData();
         assertNotNull(removeMembersResults);
