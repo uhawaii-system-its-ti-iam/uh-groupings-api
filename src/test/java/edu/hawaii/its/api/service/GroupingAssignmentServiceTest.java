@@ -140,7 +140,7 @@ class GroupingAssignmentServiceTest {
     }
 
     @Test
-    public void groupingImmediateOwnersTest() {
+    public void groupingDirectOwnerEntriesTest() {
 
         // the service should delegate to Grouper for immediate owners and return a non-null result.
         GetMembersResult getMembersResult =
@@ -158,7 +158,7 @@ class GroupingAssignmentServiceTest {
                         groupPath + GroupType.OWNERS.value());
 
         assertNotNull(
-                groupingAssignmentService.groupingImmediateOwners(
+                groupingAssignmentService.groupingDirectOwnerEntries(
                         ADMIN,
                         groupPath));
     }
@@ -284,7 +284,7 @@ class GroupingAssignmentServiceTest {
     }
 
     @Test
-    public void numberOfDirectOwnersTest() {
+    public void numberOfDirectUserOwnersTest() {
 
         // when the current user is an owner and admin, counting direct owners should succeed.
         doReturn(true)
@@ -311,7 +311,7 @@ class GroupingAssignmentServiceTest {
 
         // the number of direct owners should be counted correctly
         assertEquals(1,
-                groupingAssignmentService.numberOfDirectOwners(
+                groupingAssignmentService.numberOfDirectUserOwners(
                         ADMIN,
                         groupPath));
 
@@ -321,7 +321,7 @@ class GroupingAssignmentServiceTest {
                 .isCurrentUserAdmin();
 
         assertNotNull(
-                groupingAssignmentService.numberOfDirectOwners(
+                groupingAssignmentService.numberOfDirectUserOwners(
                         ADMIN,
                         groupPath));
 
@@ -332,13 +332,13 @@ class GroupingAssignmentServiceTest {
 
         assertThrows(
                 AccessDeniedException.class,
-                () -> groupingAssignmentService.numberOfDirectOwners(
+                () -> groupingAssignmentService.numberOfDirectUserOwners(
                         ADMIN,
                         groupPath));
     }
 
     @Test
-    public void numberOfImmediateOwnersTest() {
+    public void numberOfDirectOwnerEntriesTest() {
 
         // when the current user is an owner, counting immediate owners should succeed.
         doReturn(true)
@@ -360,7 +360,7 @@ class GroupingAssignmentServiceTest {
                         groupPath + GroupType.OWNERS.value());
 
         assertEquals(2,
-                groupingAssignmentService.numberOfImmediateOwners(
+                groupingAssignmentService.numberOfDirectOwnerEntries(
                         ADMIN,
                         groupPath));
 
@@ -371,7 +371,7 @@ class GroupingAssignmentServiceTest {
 
         assertThrows(
                 AccessDeniedException.class,
-                () -> groupingAssignmentService.numberOfImmediateOwners(
+                () -> groupingAssignmentService.numberOfDirectOwnerEntries(
                         ADMIN,
                         groupPath));
     }
