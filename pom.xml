@@ -98,6 +98,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.icegreen</groupId>
             <artifactId>greenmail-junit5</artifactId>
             <version>2.1.0</version>
@@ -190,7 +195,7 @@
                                 <echo>To run the unit tests with your Grouper server:</echo>
                                 <echo>$ ./mvnw clean test</echo>
                                 <echo>To run the integrations tests with your Grouper server:</echo>
-                                <echo>$ ./mvnw clean test -D'test=Test*' </echo>
+                                <echo>$ ./mvnw clean test -Pintegration-tests</echo>
                                 <echo/>
                                 <echo>To create a jacoco test report:</echo>
                                 <echo>$ ./mvnw clean test jacoco:report</echo>
@@ -264,4 +269,23 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludes combine.self="override"/>
+                            <includes>
+                                <include>**/Test*.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
